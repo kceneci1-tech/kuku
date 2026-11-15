@@ -1,0 +1,2618 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Mobil Uygulama (PWA / Capacitor / Cordova) Hazırlık Etiketleri -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kükü">
+    <meta name="theme-color" content="#800020">
+    <link rel="manifest" id="pwaManifestLink">
+    <link rel="apple-touch-icon" id="appleTouchIconLink">
+    <link rel="icon" type="image/png" href="kuku-icon.png">
+    <title>Kükü — Bordo Mavi Edition</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Türkçe Karakter Destekli Modern Oyun Fontları -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #05060d;
+            font-family: 'Inter', sans-serif;
+            touch-action: none;
+        }
+
+        .font-display {
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        /* Masaüstü arka planında Bordo-Mavi ambiyans ışığı */
+        .desktop-backdrop {
+            background:
+                radial-gradient(circle at 20% 20%, rgba(128, 0, 32, 0.28) 0%, transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.22) 0%, transparent 45%),
+                #05060d;
+        }
+
+        /* Mobil Uygulama Çerçevesi */
+        .app-shell {
+            background-color: #070812;
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.85),
+                0 0 45px rgba(128, 0, 32, 0.4),
+                0 0 45px rgba(56, 189, 248, 0.25);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Bordo-Mavi Neon Başlıklar ve Butonlar */
+        .bm-title-glow {
+            text-shadow:
+                0 0 12px rgba(56, 189, 248, 0.75),
+                0 0 28px rgba(128, 0, 32, 0.85);
+        }
+
+        .bm-btn-primary {
+            background: linear-gradient(135deg, #800020 0%, #a8002a 48%, #0284c7 52%, #38bdf8 100%);
+            background-size: 200% 200%;
+            background-position: 15% 50%;
+            box-shadow:
+                0 8px 25px rgba(128, 0, 32, 0.55),
+                0 0 20px rgba(56, 189, 248, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.45);
+            transition: transform 0.16s ease, box-shadow 0.16s ease, background-position 0.35s ease;
+        }
+
+        .bm-btn-primary:hover {
+            background-position: 85% 50%;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow:
+                0 10px 30px rgba(56, 189, 248, 0.6),
+                0 0 25px rgba(128, 0, 32, 0.65),
+                inset 0 1px 2px rgba(255, 255, 255, 0.7);
+        }
+
+        .bm-btn-primary:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .bm-glass {
+            background: rgba(11, 13, 28, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+        }
+
+        .bm-pill {
+            background: rgba(13, 16, 34, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        @keyframes pulse61 {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        .badge-pulse {
+            animation: pulse61 1.6s infinite ease-in-out;
+        }
+
+        @keyframes bannerSlide {
+            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.88); }
+            18% { opacity: 1; transform: translate(-50%, 0) scale(1.04); }
+            82% { opacity: 1; transform: translate(-50%, -2px) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -14px) scale(0.94); }
+        }
+
+        .banner-anim {
+            animation: bannerSlide 1.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+    </style>
+</head>
+<body class="desktop-backdrop flex items-center justify-center w-full h-full overflow-hidden text-slate-100">
+
+    <!-- Mobil Uygulama Konteyneri (Mobilde tam ekran, masaüstünde şık telefon çerçevesi) -->
+    <main id="appContainer" class="app-shell relative w-full h-[100dvh] sm:w-[420px] sm:h-[92vh] sm:max-h-[840px] sm:rounded-[38px] sm:border-[3px] sm:border-sky-400/30 overflow-hidden flex flex-col">
+
+        <!-- Mobil Uygulama Üst Durum Çubuğu (Sadece geniş ekranlarda çerçeve hissini güçlendirir) -->
+        <div class="hidden sm:flex items-center justify-between px-6 pt-2.5 pb-1 text-[11px] font-semibold text-slate-300/90 bg-gradient-to-r from-[#800020]/40 via-[#070812] to-[#0284c7]/30 z-30 shrink-0">
+            <span id="statusClock">00:61</span>
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#800020] ring-1 ring-white/40"></span>
+                <span class="tracking-wider text-[10px] uppercase text-sky-300 font-bold">Trabzon App</span>
+                <span class="w-2 h-2 rounded-full bg-[#38BDF8] ring-1 ring-white/40"></span>
+            </div>
+            <div class="flex items-center gap-1.5 text-sky-300">
+                <span>5G</span>
+                <div class="w-5 h-2.5 rounded-sm border border-slate-400/70 p-0.5 flex items-center">
+                    <div class="w-full h-full bg-sky-400 rounded-[1px]"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oyun Alanı ve Arayüz Katmanları -->
+        <div id="stageWrapper" class="relative flex-1 w-full h-full overflow-hidden">
+            <!-- Ana HTML5 Canvas -->
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- Üst Uygulama HUD Çubuğu -->
+            <header class="absolute top-0 left-0 right-0 z-20 flex items-center justify-between gap-1.5 px-3 pt-3 sm:pt-2.5 pointer-events-none">
+                <!-- Sol: Duraklat Butonu & Skor -->
+                <div class="flex items-center gap-1.5">
+                    <button id="pauseBtn" type="button" aria-label="Oyunu Duraklat"
+                        class="pointer-events-auto bm-pill hover:bg-slate-800/90 active:scale-95 rounded-2xl p-2.5 text-sky-300 transition cursor-pointer flex items-center justify-center shadow-md">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <rect x="6" y="5" width="4" height="14" rx="1.5"></rect>
+                            <rect x="14" y="5" width="4" height="14" rx="1.5"></rect>
+                        </svg>
+                    </button>
+
+                    <div class="bm-pill rounded-2xl px-3 py-1.5 flex flex-col min-w-[78px] border-l-2 border-l-[#800020]">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-sky-300/90">Skor</span>
+                        <span id="scoreValue" class="font-display text-lg font-black text-white leading-tight">0</span>
+                    </div>
+                </div>
+
+                <!-- Orta: Kombo Göstergesi -->
+                <div class="bm-pill rounded-2xl px-3 py-1.5 flex flex-col items-center min-w-[76px]">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-rose-300">Kombo</span>
+                        <span id="comboMultiplier" class="font-display text-sm font-black text-sky-300 leading-none">x1</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1">
+                        <div id="comboBar" class="h-full bg-gradient-to-r from-[#800020] via-rose-500 to-[#38BDF8] rounded-full" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- Sağ: Rekor & Ses Aç/Kapat -->
+                <div class="flex items-center gap-1.5">
+                    <div class="bm-pill rounded-2xl px-3 py-1.5 flex flex-col items-end min-w-[74px] border-r-2 border-r-[#38BDF8]">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-amber-300/90">Rekor</span>
+                        <span id="highScoreValue" class="font-display text-lg font-black text-white leading-tight">0</span>
+                    </div>
+
+                    <button id="soundToggleBtn" type="button" aria-label="Sesi Aç veya Kapat"
+                        class="pointer-events-auto bm-pill hover:bg-slate-800/90 active:scale-95 rounded-2xl p-2.5 text-sky-300 transition cursor-pointer flex items-center justify-center shadow-md">
+                        <svg id="soundOnIcon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.54 8.46a5 5 0 010 7.07"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.07 4.93a10 10 0 010 14.14"></path>
+                        </svg>
+                        <svg id="soundOffIcon" class="w-5 h-5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                            <line x1="23" y1="9" x2="17" y2="15" stroke-linecap="round"></line>
+                            <line x1="17" y1="9" x2="23" y2="15" stroke-linecap="round"></line>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Aktif Güçlendirme Süre Çubukları -->
+            <div id="activePowerupsContainer" class="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none w-full px-4"></div>
+
+            <!-- Hız / Hamsi Sürüsü Bildirimi -->
+            <div id="speedBanner" class="absolute top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none hidden">
+                <div class="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#800020]/90 to-[#0284c7]/90 border border-sky-300/50 shadow-lg flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-2 h-2 rounded-full bg-sky-300 animate-ping"></span>
+                    <span id="speedBannerText" class="font-display font-extrabold text-xs tracking-wider text-white uppercase">Hamsi Sürüsü Hızlanıyor!</span>
+                </div>
+            </div>
+
+            <!-- BAŞLANGIÇ EKRANI -->
+            <section id="startScreen" class="absolute inset-0 z-30 flex items-center justify-center p-4 bg-[#070812]/75 backdrop-blur-sm">
+                <div class="bm-glass rounded-3xl w-full p-5 sm:p-6 text-center flex flex-col items-center shadow-2xl border-t-2 border-t-[#7A0026] border-b-2 border-b-[#00AEEF]">
+                    <!-- Üst Rozet -->
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gradient-to-r from-[#7A0026]/70 to-[#00AEEF]/40 border border-sky-400/30 text-sky-200 text-[11px] font-bold tracking-widest uppercase mb-2">
+                        <span>★ Bordo-Mavi Uzay Macerası ★</span>
+                    </div>
+
+                    <!-- Canlı Karakter Önizlemesi -->
+                    <div class="relative flex flex-col items-center my-2">
+                        <div class="relative w-[108px] h-[108px] rounded-full bg-[#090b1a]/90 border-2 border-sky-400/40 shadow-[0_0_25px_rgba(0,174,239,0.35)] flex items-center justify-center overflow-hidden">
+                            <canvas id="previewCanvas" width="108" height="108" class="w-full h-full"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Özel Sevgi Mesajı -->
+                    <div class="my-1.5 px-4 py-1.5 rounded-2xl bg-gradient-to-r from-[#800020]/80 via-rose-600/55 to-[#0284c7]/70 border border-rose-300/50 shadow-[0_0_20px_rgba(244,63,94,0.45)] badge-pulse">
+                        <p class="font-display text-sm sm:text-base font-extrabold tracking-wide text-white">
+                            ❤️ Kürşad seni çok seviyor ❤️
+                        </p>
+                    </div>
+
+                    <h1 class="font-display text-2xl sm:text-3xl font-black tracking-tight text-white bm-title-glow leading-tight mt-1 mb-1.5">
+                        KÜKÜ
+                    </h1>
+
+                    <p class="text-slate-300 text-xs leading-relaxed mb-3">
+                        TS 61 şapkalı kahramanımızı yönlendir! Yıldızları ve fındıkları topla, uzay hamsilerine yakalanma.
+                    </p>
+
+                    <!-- Rekor Kartı -->
+                    <div class="w-full rounded-2xl bg-slate-900/75 border border-white/10 py-1.5 px-4 mb-3.5 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400">En Yüksek Skorun</span>
+                        <span id="startHighScore" class="font-display text-lg font-black text-sky-300">0</span>
+                    </div>
+
+                    <!-- Güçlendirme Rehberi -->
+                    <div class="grid grid-cols-3 gap-2 w-full mb-5 text-xs">
+                        <div class="rounded-2xl bg-[#800020]/25 border border-[#800020]/60 p-2.5 flex flex-col items-center gap-1">
+                            <span class="w-4 h-4 rounded-full bg-gradient-to-tr from-[#800020] to-[#38BDF8] border border-white/60 shadow"></span>
+                            <span class="font-bold text-white text-[11px]">B-M Kalkan</span>
+                            <span class="text-[10px] text-slate-300 leading-tight">Hamsiyi Parçalar</span>
+                        </div>
+                        <div class="rounded-2xl bg-amber-500/15 border border-amber-400/40 p-2.5 flex flex-col items-center gap-1">
+                            <span class="text-sm leading-none">🫖</span>
+                            <span class="font-bold text-amber-200 text-[11px]">İnce Belli Çay</span>
+                            <span class="text-[10px] text-slate-300 leading-tight">%50 Yavaşlatır</span>
+                        </div>
+                        <div class="rounded-2xl bg-sky-500/15 border border-sky-400/40 p-2.5 flex flex-col items-center gap-1">
+                            <span class="text-sm leading-none">🧲</span>
+                            <span class="font-bold text-sky-200 text-[11px]">Fındık Mıknatısı</span>
+                            <span class="text-[10px] text-slate-300 leading-tight">Ödülleri Çeker</span>
+                        </div>
+                    </div>
+
+                    <button id="startBtn" type="button"
+                        class="bm-btn-primary w-full py-3.5 px-6 rounded-2xl font-display font-black text-lg tracking-wider text-white uppercase cursor-pointer">
+                        OYNA
+                    </button>
+                    <p class="text-[11px] text-slate-400 mt-2.5">Dokun ve sürükle, fare veya ok tuşlarıyla oyna</p>
+
+                    <button id="installAppBtn" type="button"
+                        class="mt-2.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-800/85 hover:bg-slate-700/90 border border-sky-400/30 text-[11px] font-semibold text-sky-300 transition cursor-pointer">
+                        <span>📲 Uygulama Olarak Yükle</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- CHROME & MOBİL UYGULAMA KURULUM BİLGİ PENCERESİ -->
+            <section id="installModal" class="absolute inset-0 z-40 hidden items-center justify-center p-4 bg-[#070812]/85 backdrop-blur-md">
+                <div class="bm-glass rounded-3xl w-full max-w-xs p-5 text-left flex flex-col border-t-2 border-t-[#7A0026] border-b-2 border-b-[#00AEEF]">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-display text-lg font-black text-white">App & Chrome Kurulumu</h3>
+                        <button id="closeInstallModalBtn" type="button" class="text-slate-400 hover:text-white text-lg font-bold px-2 cursor-pointer">✕</button>
+                    </div>
+                    <div class="space-y-2.5 text-xs text-slate-300 leading-relaxed mb-4">
+                        <div class="p-2.5 rounded-2xl bg-slate-900/80 border border-white/10">
+                            <p class="font-bold text-sky-300 mb-0.5">1. Google Chrome'da Açma:</p>
+                            <p>Dosyayı <code class="text-amber-300">index.html</code> olarak kaydedip Chrome'a sürükleyin. Adres çubuğundaki <b>Yükle (Install)</b> simgesiyle masaüstü/telefon uygulaması olur.</p>
+                        </div>
+                        <div class="p-2.5 rounded-2xl bg-slate-900/80 border border-white/10">
+                            <p class="font-bold text-rose-300 mb-0.5">2. Telefon Uygulaması (APK):</p>
+                            <p>Android/iOS WebView veya Capacitor içine doğrudan tek dosya olarak gömülüp tam ekran çalışır.</p>
+                        </div>
+                    </div>
+                    <button id="confirmInstallModalBtn" type="button"
+                        class="bm-btn-primary w-full py-2.5 px-4 rounded-2xl font-display font-extrabold text-sm text-white uppercase cursor-pointer">
+                        ANLADIM
+                    </button>
+                </div>
+            </section>
+
+            <!-- DURAKLATMA (PAUSE) EKRANI -->
+            <section id="pauseScreen" class="absolute inset-0 z-30 hidden items-center justify-center p-4 bg-[#070812]/80 backdrop-blur-md">
+                <div class="bm-glass rounded-3xl w-full max-w-xs p-6 text-center flex flex-col items-center border-t-2 border-t-[#7A0026] border-b-2 border-b-[#00AEEF]">
+                    <span class="text-xs font-bold uppercase tracking-widest text-sky-300 mb-1">Mola Verildi</span>
+                    <h2 class="font-display text-3xl font-black text-white bm-title-glow mb-5">
+                        DURAKLATILDI
+                    </h2>
+                    <div class="flex flex-col gap-3 w-full">
+                        <button id="resumeBtn" type="button"
+                            class="bm-btn-primary w-full py-3.5 px-6 rounded-2xl font-display font-black text-base tracking-wider text-white uppercase cursor-pointer">
+                            DEVAM ET
+                        </button>
+                        <button id="pauseRestartBtn" type="button"
+                            class="w-full py-3 px-6 rounded-2xl bg-slate-800/90 hover:bg-slate-700/90 border border-sky-400/30 font-display font-bold text-sm tracking-wider text-sky-200 uppercase transition cursor-pointer">
+                            YENİDEN BAŞLAT
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- OYUN BİTTİ (GAME OVER) EKRANI -->
+            <section id="gameOverScreen" class="absolute inset-0 z-30 hidden items-center justify-center p-4 bg-[#070812]/82 backdrop-blur-md">
+                <div class="bm-glass rounded-3xl w-full p-6 text-center flex flex-col items-center border-t-2 border-t-[#7A0026] border-b-2 border-b-[#00AEEF]">
+                    <span id="gameOverSubtitle" class="text-xs font-bold uppercase tracking-widest text-rose-400 mb-1">Hamsi tavaya düştün!</span>
+                    <h2 class="font-display text-3xl sm:text-4xl font-black text-white bm-title-glow mb-2">
+                        OYUN BİTTİ
+                    </h2>
+
+                    <!-- Yeni Rekor Rozeti -->
+                    <div id="newRecordBadge" class="hidden badge-pulse mt-1 mb-2 px-4 py-1 rounded-full bg-gradient-to-r from-[#800020] via-amber-500 to-[#38BDF8] text-white font-display font-extrabold text-xs uppercase tracking-wider shadow-lg">
+                        ★ YENİ REKOR! ★
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 w-full my-4">
+                        <div class="rounded-2xl bg-[#800020]/25 border border-[#800020]/60 p-3.5 flex flex-col items-center">
+                            <span class="text-[11px] uppercase tracking-wider text-rose-200 font-semibold mb-1">Skorun</span>
+                            <span id="finalScoreValue" class="font-display text-3xl font-black text-white">0</span>
+                        </div>
+                        <div class="rounded-2xl bg-sky-500/15 border border-sky-400/50 p-3.5 flex flex-col items-center">
+                            <span class="text-[11px] uppercase tracking-wider text-sky-200 font-semibold mb-1">En Yüksek</span>
+                            <span id="finalHighScoreValue" class="font-display text-3xl font-black text-sky-300">0</span>
+                        </div>
+                    </div>
+
+                    <button id="restartBtn" type="button"
+                        class="bm-btn-primary w-full py-3.5 px-6 rounded-2xl font-display font-black text-lg tracking-wider text-white uppercase cursor-pointer">
+                        TEKRAR OYNA
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Mobil Alt Ana Ekran Çubuğu (Home Indicator) -->
+        <div class="hidden sm:flex items-center justify-center py-2 bg-[#070812] shrink-0">
+            <div class="w-28 h-1 rounded-full bg-slate-600/60"></div>
+        </div>
+    </main>
+
+    <script>
+        /**
+         * KÜKÜ — BORDO MAVİ EDITION
+         * TS 61 şapkalı uzay kahramanı ile uzay hamsilerinden kaçış arcade oyunu.
+         */
+
+        // ==========================================
+        // 1. WEB AUDIO API RETRO ARCADE & TRABZON MÜZİK MOTORU
+        // ==========================================
+        class RetroSoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.masterGain = null;
+                this.compressor = null;
+                this.muted = false;
+                this.musicPlaying = false;
+                this.musicTimer = null;
+                this.musicStep = 0;
+                this.uyyyBuffers = [];
+                this.ttsLoading = false;
+                this.ttsLoaded = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        this.ctx = new AudioCtx();
+                        this.compressor = this.ctx.createDynamicsCompressor();
+                        this.compressor.threshold.setValueAtTime(-16, this.ctx.currentTime);
+                        this.compressor.knee.setValueAtTime(12, this.ctx.currentTime);
+                        this.compressor.ratio.setValueAtTime(4, this.ctx.currentTime);
+                        this.compressor.attack.setValueAtTime(0.005, this.ctx.currentTime);
+                        this.compressor.release.setValueAtTime(0.15, this.ctx.currentTime);
+
+                        this.masterGain = this.ctx.createGain();
+                        this.masterGain.gain.setValueAtTime(this.muted ? 0 : 0.85, this.ctx.currentTime);
+
+                        this.compressor.connect(this.masterGain);
+                        this.masterGain.connect(this.ctx.destination);
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                if (!this.ttsLoaded && !this.ttsLoading) {
+                    this.preloadUyyyVoices();
+                }
+            }
+
+            getOutputNode() {
+                return this.compressor || (this.ctx ? this.ctx.destination : null);
+            }
+
+            toggleMute() {
+                this.muted = !this.muted;
+                if (this.masterGain && this.ctx) {
+                    this.masterGain.gain.setValueAtTime(this.muted ? 0 : 0.85, this.ctx.currentTime);
+                }
+                if (this.muted) {
+                    this.stopMusic(false);
+                } else if (typeof gameState !== 'undefined' && gameState === 'PLAYING') {
+                    this.startMusic();
+                }
+                return this.muted;
+            }
+
+            // Gerçekçi İnsan Sesiyle Komik "Uyyy!" Seslerini Ön Yükle (Gemini TTS)
+            async preloadUyyyVoices() {
+                if (this.ttsLoading || this.ttsLoaded) return;
+                this.ttsLoading = true;
+
+                const prompts = [
+                    {
+                        text: 'Say in a funny, surprised, energetic Turkish Black Sea Trabzon accent, expressive and lively: Uyyy!',
+                        voice: 'Fenrir'
+                    },
+                    {
+                        text: 'Say playfully and surprised with a funny Turkish Black Sea accent: Uyyy, fındık!',
+                        voice: 'Puck'
+                    }
+                ];
+
+                const apiKey = '';
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+                for (const item of prompts) {
+                    try {
+                        const payload = {
+                            contents: [{ parts: [{ text: item.text }] }],
+                            generationConfig: {
+                                responseModalities: ['AUDIO'],
+                                speechConfig: {
+                                    voiceConfig: {
+                                        prebuiltVoiceConfig: { voiceName: item.voice }
+                                    }
+                                }
+                            },
+                            model: 'gemini-2.5-flash-preview-tts'
+                        };
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) continue;
+                        const result = await response.json();
+                        const part = result?.candidates?.[0]?.content?.parts?.[0];
+                        const audioData = part?.inlineData?.data;
+                        const mimeType = part?.inlineData?.mimeType || '';
+
+                        if (audioData && mimeType.startsWith('audio/')) {
+                            const rateMatch = mimeType.match(/rate=(\d+)/);
+                            const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+                            const binaryStr = atob(audioData);
+                            const bytes = new Uint8Array(binaryStr.length);
+                            for (let i = 0; i < binaryStr.length; i++) {
+                                bytes[i] = binaryStr.charCodeAt(i);
+                            }
+                            const pcm16 = new Int16Array(bytes.buffer);
+                            const audioCtx = this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+                            const buffer = audioCtx.createBuffer(1, pcm16.length, sampleRate);
+                            const channel = buffer.getChannelData(0);
+                            for (let i = 0; i < pcm16.length; i++) {
+                                channel[i] = pcm16[i] / 32768.0;
+                            }
+                            this.uyyyBuffers.push(buffer);
+                        }
+                    } catch (e) {
+                        // Çevrimdışı veya ağ hatasında gerçekçi formant ses sentezleyici devreye girer
+                    }
+                }
+
+                this.ttsLoading = false;
+                if (this.uyyyBuffers.length > 0) {
+                    this.ttsLoaded = true;
+                }
+            }
+
+            // Fındık Alındığında Çalan Komik ve Gerçekçi "Uyyy!" Sesi
+            playUyyy() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                if (this.uyyyBuffers.length > 0) {
+                    const buf = this.uyyyBuffers[Math.floor(Math.random() * this.uyyyBuffers.length)];
+                    const src = this.ctx.createBufferSource();
+                    const gain = this.ctx.createGain();
+                    src.buffer = buf;
+                    src.playbackRate.value = 0.96 + Math.random() * 0.1;
+                    gain.gain.setValueAtTime(1.35, this.ctx.currentTime);
+                    src.connect(gain);
+                    gain.connect(this.getOutputNode());
+                    src.start(0);
+                } else {
+                    this._playSynthUyyy();
+                }
+            }
+
+            // Çevrimdışı / Anında Devreye Giren Formant Vokal "Uyyy!" Sentezleyici
+            _playSynthUyyy() {
+                if (!this.ctx || this.muted) return;
+                const now = this.ctx.currentTime;
+                const duration = 0.44;
+                const out = this.getOutputNode();
+
+                // Ses telleri (Glottal darbe + komik Karadeniz tonlaması: yükselip inen perde)
+                const voiceOsc = this.ctx.createOscillator();
+                const subOsc = this.ctx.createOscillator();
+                const vibrato = this.ctx.createOscillator();
+                const vibratoGain = this.ctx.createGain();
+
+                voiceOsc.type = 'sawtooth';
+                subOsc.type = 'triangle';
+
+                // "U" başlangıcından tiz "yyy!" vurgusuna yükselen perde eğrisi
+                voiceOsc.frequency.setValueAtTime(165, now);
+                voiceOsc.frequency.exponentialRampToValueAtTime(285, now + 0.16);
+                voiceOsc.frequency.exponentialRampToValueAtTime(245, now + 0.32);
+                voiceOsc.frequency.exponentialRampToValueAtTime(185, now + duration);
+
+                subOsc.frequency.setValueAtTime(82.5, now);
+                subOsc.frequency.exponentialRampToValueAtTime(142.5, now + 0.16);
+                subOsc.frequency.exponentialRampToValueAtTime(92.5, now + duration);
+
+                vibrato.frequency.setValueAtTime(6.5, now);
+                vibratoGain.gain.setValueAtTime(7, now);
+                vibrato.connect(vibratoGain);
+                vibratoGain.connect(voiceOsc.frequency);
+
+                // İnsan ağzı formant filtreleri ("U" -> "Ü/İ" -> "Y" geçişi)
+                const f1 = this.ctx.createBiquadFilter();
+                f1.type = 'bandpass';
+                f1.Q.setValueAtTime(4.5, now);
+                f1.frequency.setValueAtTime(320, now);
+                f1.frequency.linearRampToValueAtTime(280, now + duration);
+
+                const f2 = this.ctx.createBiquadFilter();
+                f2.type = 'bandpass';
+                f2.Q.setValueAtTime(5.5, now);
+                f2.frequency.setValueAtTime(780, now);
+                f2.frequency.exponentialRampToValueAtTime(2250, now + 0.22);
+                f2.frequency.linearRampToValueAtTime(2400, now + duration);
+
+                const f3 = this.ctx.createBiquadFilter();
+                f3.type = 'bandpass';
+                f3.Q.setValueAtTime(6.0, now);
+                f3.frequency.setValueAtTime(2350, now);
+                f3.frequency.exponentialRampToValueAtTime(3050, now + 0.25);
+
+                const masterEnv = this.ctx.createGain();
+                masterEnv.gain.setValueAtTime(0.001, now);
+                masterEnv.gain.linearRampToValueAtTime(0.42, now + 0.045);
+                masterEnv.gain.setValueAtTime(0.38, now + 0.28);
+                masterEnv.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                const f1Gain = this.ctx.createGain(); f1Gain.gain.value = 1.4;
+                const f2Gain = this.ctx.createGain(); f2Gain.gain.value = 1.1;
+                const f3Gain = this.ctx.createGain(); f3Gain.gain.value = 0.65;
+
+                voiceOsc.connect(f1);
+                voiceOsc.connect(f2);
+                voiceOsc.connect(f3);
+                subOsc.connect(f1);
+
+                f1.connect(f1Gain); f1Gain.connect(masterEnv);
+                f2.connect(f2Gain); f2Gain.connect(masterEnv);
+                f3.connect(f3Gain); f3Gain.connect(masterEnv);
+                masterEnv.connect(out);
+
+                voiceOsc.start(now);
+                subOsc.start(now);
+                vibrato.start(now);
+
+                voiceOsc.stop(now + duration + 0.02);
+                subOsc.stop(now + duration + 0.02);
+                vibrato.stop(now + duration + 0.02);
+            }
+
+            // Yüksek Sesli, Hareketli & Komik Karadeniz Kemençe / Kolbastı Müziği
+            startMusic() {
+                this.musicPlaying = true;
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                if (this.musicTimer) {
+                    clearInterval(this.musicTimer);
+                    this.musicTimer = null;
+                }
+
+                // Coşkulu Kolbastı / Horon temposu (110ms)
+                const stepMs = 110;
+                this._playKemenceStep();
+                this.musicTimer = setInterval(() => {
+                    if (!this.musicPlaying || this.muted) return;
+                    this._playKemenceStep();
+                }, stepMs);
+            }
+
+            stopMusic(resetFlag = true) {
+                if (resetFlag) {
+                    this.musicPlaying = false;
+                }
+                if (this.musicTimer) {
+                    clearInterval(this.musicTimer);
+                    this.musicTimer = null;
+                }
+            }
+
+            _playKemenceStep() {
+                if (!this.ctx || this.muted) return;
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+
+                const now = this.ctx.currentTime;
+                const step = this.musicStep % 32;
+                this.musicStep++;
+                const out = this.getOutputNode();
+
+                // Karadeniz Hicaz / Kolbastı Dizisi
+                const N = {
+                    A2: 110.00,
+                    E3: 164.81,
+                    A3: 220.00,
+                    E4: 329.63,
+                    A4: 440.00,
+                    Bb4: 466.16,
+                    Cs5: 554.37,
+                    D5: 587.33,
+                    E5: 659.25,
+                    F5: 698.46,
+                    G5: 783.99,
+                    A5: 880.00
+                };
+
+                // 32 adımlık yüksek enerjili Trabzon Kolbastı & Kemençe melodisi
+                const melody = [
+                    N.E5, N.F5, N.E5, N.D5, N.Cs5, N.D5, N.E5, N.A5,
+                    N.G5, N.F5, N.E5, N.D5, N.Cs5, N.D5, N.E5, 0,
+                    N.D5, N.E5, N.D5, N.Cs5, N.Bb4, N.A4, N.Bb4, N.Cs5,
+                    N.D5, N.E5, N.F5, N.G5, N.A5, N.E5, N.A4, 0
+                ];
+
+                // Komik "Hoppa!" kemençe kaydırma ve gıcırtı efektleri
+                const slideSteps = new Set([1, 7, 8, 17, 28]);
+                const freq = melody[step];
+
+                if (freq > 0) {
+                    // Çift telli parlak ve yüksek sesli kemençe
+                    const osc1 = this.ctx.createOscillator();
+                    const osc2 = this.ctx.createOscillator();
+                    const presence = this.ctx.createBiquadFilter();
+                    const gain = this.ctx.createGain();
+
+                    osc1.type = 'sawtooth';
+                    osc2.type = 'square';
+
+                    if (slideSteps.has(step)) {
+                        osc1.frequency.setValueAtTime(freq * 0.82, now);
+                        osc1.frequency.exponentialRampToValueAtTime(freq, now + 0.055);
+                        osc2.frequency.setValueAtTime(freq * 1.005 * 0.82, now);
+                        osc2.frequency.exponentialRampToValueAtTime(freq * 1.005, now + 0.055);
+                    } else {
+                        osc1.frequency.setValueAtTime(freq, now);
+                        osc2.frequency.setValueAtTime(freq * 1.005, now);
+                    }
+
+                    // Kemençe gövde rezonansı (sesi boğmadan parlatan peaking filtre)
+                    presence.type = 'peaking';
+                    presence.frequency.setValueAtTime(1600, now);
+                    presence.Q.setValueAtTime(1.4, now);
+                    presence.gain.setValueAtTime(6.5, now);
+
+                    gain.gain.setValueAtTime(0.001, now);
+                    gain.gain.linearRampToValueAtTime(0.22, now + 0.012);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.105);
+
+                    osc1.connect(presence);
+                    osc2.connect(presence);
+                    presence.connect(gain);
+                    gain.connect(out);
+
+                    osc1.start(now);
+                    osc2.start(now);
+                    osc1.stop(now + 0.11);
+                    osc2.stop(now + 0.11);
+                }
+
+                // Güçlü Karadeniz Davulu & Tulum Dem Bası
+                if (step % 2 === 0) {
+                    const bassOsc = this.ctx.createOscillator();
+                    const bassGain = this.ctx.createGain();
+                    const isDownbeat = step % 4 === 0;
+
+                    bassOsc.type = isDownbeat ? 'sine' : 'triangle';
+                    if (isDownbeat) {
+                        bassOsc.frequency.setValueAtTime(155, now);
+                        bassOsc.frequency.exponentialRampToValueAtTime(52, now + 0.095);
+                    } else {
+                        bassOsc.frequency.setValueAtTime(N.E3, now);
+                    }
+
+                    bassGain.gain.setValueAtTime(isDownbeat ? 0.34 : 0.18, now);
+                    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.105);
+
+                    bassOsc.connect(bassGain);
+                    bassGain.connect(out);
+                    bassOsc.start(now);
+                    bassOsc.stop(now + 0.11);
+                } else {
+                    // Ara vuruşlarda kaşık / alkış ritmi
+                    const bufLen = Math.floor(this.ctx.sampleRate * 0.045);
+                    const nBuf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+                    const nData = nBuf.getChannelData(0);
+                    for (let i = 0; i < bufLen; i++) {
+                        nData[i] = Math.random() * 2 - 1;
+                    }
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = nBuf;
+
+                    const hp = this.ctx.createBiquadFilter();
+                    hp.type = 'highpass';
+                    hp.frequency.setValueAtTime(2200, now);
+
+                    const clapGain = this.ctx.createGain();
+                    clapGain.gain.setValueAtTime(0.11, now);
+                    clapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+                    noise.connect(hp);
+                    hp.connect(clapGain);
+                    clapGain.connect(out);
+                    noise.start(now);
+                }
+            }
+
+            // Yıldız toplama melodisi (Kombo ile tizleşir)
+            playCollect(combo = 1) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                const pitchStep = (combo - 1) * 2.5;
+                const baseFreq = 523.25 * Math.pow(2, pitchStep / 12);
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(baseFreq, now);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, now + 0.13);
+
+                gain.gain.setValueAtTime(0.24, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                osc.connect(gain);
+                gain.connect(this.getOutputNode());
+                osc.start(now);
+                osc.stop(now + 0.16);
+            }
+
+            // 61 Özel Bonus Fanfarı
+            playBonus61() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.5];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const t = now + i * 0.055;
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, t);
+                    gain.gain.setValueAtTime(0.11, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.23);
+                });
+            }
+
+            // Güçlendirme (Kalkan, İnce Belli Çay, Mıknatıs) sesi
+            playPowerup(type) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const notes = type === 'tea'
+                    ? [440, 587.33, 739.99, 880]
+                    : [392, 493.88, 587.33, 783.99];
+
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const start = now + idx * 0.045;
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, start);
+
+                    gain.gain.setValueAtTime(0.18, start);
+                    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.18);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(start);
+                    osc.stop(start + 0.19);
+                });
+            }
+
+            // Kalkanın Hamsiyi Savurma Sesi
+            playShieldBounce() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(280, now);
+                osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
+                osc.frequency.exponentialRampToValueAtTime(190, now + 0.3);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.33);
+            }
+
+            // Oyun Bitti (Game Over) Sesi
+            playGameOver() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const tones = [311.13, 277.18, 233.08, 155.56];
+                tones.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const start = now + idx * 0.11;
+
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, start);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 0.85, start + 0.18);
+
+                    gain.gain.setValueAtTime(0.2, start);
+                    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(start);
+                    osc.stop(start + 0.24);
+                });
+            }
+        }
+
+        // ==========================================
+        // 2. DOM ELEMANLARI VE DURUM DEĞİŞKENLERİ
+        // ==========================================
+        const stageWrapper = document.getElementById('stageWrapper');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const sound = new RetroSoundEngine();
+
+        // HUD ve Ekran Elemanları
+        const scoreEl = document.getElementById('scoreValue');
+        const comboMultEl = document.getElementById('comboMultiplier');
+        const comboBarEl = document.getElementById('comboBar');
+        const highScoreEl = document.getElementById('highScoreValue');
+        const startHighScoreEl = document.getElementById('startHighScore');
+        const activePowerupsEl = document.getElementById('activePowerupsContainer');
+        const speedBannerEl = document.getElementById('speedBanner');
+        const speedBannerTextEl = document.getElementById('speedBannerText');
+
+        const startScreenEl = document.getElementById('startScreen');
+        const pauseScreenEl = document.getElementById('pauseScreen');
+        const gameOverScreenEl = document.getElementById('gameOverScreen');
+
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const pauseRestartBtn = document.getElementById('pauseRestartBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        const soundOnIcon = document.getElementById('soundOnIcon');
+        const soundOffIcon = document.getElementById('soundOffIcon');
+
+        const finalScoreEl = document.getElementById('finalScoreValue');
+        const finalHighScoreEl = document.getElementById('finalHighScoreValue');
+        const newRecordBadgeEl = document.getElementById('newRecordBadge');
+        const gameOverSubtitleEl = document.getElementById('gameOverSubtitle');
+        const statusClockEl = document.getElementById('statusClock');
+
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewCtx = previewCanvas ? previewCanvas.getContext('2d') : null;
+
+        // Gönderilen Fotoğraftaki Kızın Yüzü (Base64 Data URI)
+        const DEFAULT_FACE_DATA_URI = 'data:image/jpeg;base64,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';
+
+        const faceImg = new Image();
+        faceImg.src = DEFAULT_FACE_DATA_URI;
+        const GAME_OVER_QUOTES = [
+            'Hamsi tavaya düştün!',
+            'Uşağum hamsiye yakalandun!',
+            'Hamsiler seni ofsayta düşürdü!',
+            'Karadeniz dalgasına kapıldun!'
+        ];
+
+        // Yerel Depolama (High Score)
+        const STORAGE_KEY = 'uzayda_hamsi_high_score_v1';
+        let highScore = 0;
+        try {
+            highScore = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10) || 0;
+        } catch (e) {
+            highScore = 0;
+        }
+        highScoreEl.textContent = highScore;
+        startHighScoreEl.textContent = highScore;
+
+        // Mobil Durum Çubuğu Saat Güncellemesi
+        function updateStatusClock() {
+            if (!statusClockEl) return;
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            statusClockEl.textContent = `${hh}:${mm}`;
+        }
+        updateStatusClock();
+        setInterval(updateStatusClock, 15000);
+
+        // Tuval Boyutları
+        let width = stageWrapper.clientWidth || 390;
+        let height = stageWrapper.clientHeight || 740;
+        let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        // Oyun Durumu
+        let gameState = 'START'; // 'START', 'PLAYING', 'PAUSED', 'GAMEOVER'
+        let gameOverTimestamp = 0;
+        let score = 0;
+        let difficultyLevel = 1;
+        let lastDifficultyMilestone = 0;
+        let milestone61Count = 0;
+
+        // Kombo Durumu
+        let combo = 1;
+        let comboTimer = 0;
+        const COMBO_WINDOW = 2.0;
+
+        // Vuruş Duraklaması ve Sarsıntı
+        let hitStopTimer = 0;
+        let shakeTimer = 0;
+        let shakeMagnitude = 0;
+
+        // Varlık Listeleri
+        let bgStars = [];
+        let hamsis = [];
+        let collectibles = [];
+        let powerups = [];
+        let particles = [];
+        let shockwaves = [];
+        let floatingTexts = [];
+        let jetTrail = [];
+
+        // Doğma Zamanlayıcıları
+        let hamsiSpawnTimer = 0;
+        let collectibleSpawnTimer = 0;
+        let powerupSpawnTimer = 7.0;
+
+        // Oyuncu (Trabzonspor Şapkalı Uzay Kahramanı)
+        const player = {
+            x: width / 2,
+            y: height * 0.78,
+            vx: 0,
+            vy: 0,
+            radius: 25,
+            speed: 460,
+            tilt: 0,
+            alive: true,
+            invulnTimer: 0,
+            joyTimer: 0,
+            hasShield: false,
+            teaTimer: 0,     // İnce Belli Çay (Slow-Motion)
+            magnetTimer: 0,  // Fındık Mıknatısı
+            lookX: 0,
+            lookY: -1
+        };
+
+        const TEA_DURATION = 5.0;
+        const MAGNET_DURATION = 6.0;
+
+        // Girdi Durumları
+        const keys = {
+            ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false,
+            KeyA: false, KeyD: false, KeyW: false, KeyS: false
+        };
+
+        const pointer = {
+            active: false,
+            isTouch: false,
+            x: width / 2,
+            y: height * 0.78
+        };
+
+        // ==========================================
+        // 3. DİNAMİK CANVAS BOYUTLANDIRMA & ARKA PLAN
+        // ==========================================
+        function resizeCanvas() {
+            width = stageWrapper.clientWidth || window.innerWidth;
+            height = stageWrapper.clientHeight || window.innerHeight;
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            player.x = Math.max(player.radius + 10, Math.min(width - player.radius - 10, player.x));
+            player.y = Math.max(player.radius + 58, Math.min(height - player.radius - 12, player.y));
+
+            if (bgStars.length === 0) {
+                createStarfield();
+            }
+        }
+
+        function createStarfield() {
+            bgStars = [];
+            const count = Math.min(110, Math.floor((width * height) / 4500));
+            const starColors = ['#ffffff', '#ffffff', '#38bdf8', '#fda4af'];
+            for (let i = 0; i < count; i++) {
+                const layer = i % 3;
+                bgStars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: layer === 0 ? 1.1 : layer === 1 ? 1.7 : 2.3,
+                    speed: layer === 0 ? 28 : layer === 1 ? 68 : 135,
+                    alpha: layer === 0 ? 0.35 : layer === 1 ? 0.65 : 0.9,
+                    twinkle: Math.random() * Math.PI * 2,
+                    color: starColors[i % starColors.length]
+                });
+            }
+        }
+
+        if (typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(() => resizeCanvas()).observe(stageWrapper);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // ==========================================
+        // 4. KONTROL OLAYLARI (DOKUNMATİK, FARE, KLAVYE)
+        // ==========================================
+        function getRelativeCoords(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code in keys) {
+                keys[e.code] = true;
+                pointer.active = false;
+            }
+
+            if (e.code === 'KeyP' || e.code === 'Escape') {
+                if (gameState === 'PLAYING') {
+                    pauseGame();
+                } else if (gameState === 'PAUSED') {
+                    resumeGame();
+                }
+            }
+
+            if (e.code === 'Space' || e.code === 'Enter') {
+                if (gameState === 'START') {
+                    e.preventDefault();
+                    startGame();
+                } else if (gameState === 'GAMEOVER' && performance.now() - gameOverTimestamp > 350) {
+                    e.preventDefault();
+                    startGame();
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code in keys) {
+                keys[e.code] = false;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (gameState !== 'PLAYING') return;
+            const pos = getRelativeCoords(e.clientX, e.clientY);
+            pointer.active = true;
+            pointer.isTouch = false;
+            pointer.x = pos.x;
+            pointer.y = pos.y;
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            sound.init();
+            if (gameState !== 'PLAYING') return;
+            const pos = getRelativeCoords(e.clientX, e.clientY);
+            pointer.active = true;
+            pointer.isTouch = false;
+            pointer.x = pos.x;
+            pointer.y = pos.y;
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            sound.init();
+            if (gameState !== 'PLAYING') return;
+            if (e.touches.length > 0) {
+                const pos = getRelativeCoords(e.touches[0].clientX, e.touches[0].clientY);
+                pointer.active = true;
+                pointer.isTouch = true;
+                pointer.x = pos.x;
+                pointer.y = Math.max(58, pos.y - 46);
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (gameState !== 'PLAYING') return;
+            if (e.touches.length > 0) {
+                const pos = getRelativeCoords(e.touches[0].clientX, e.touches[0].clientY);
+                pointer.active = true;
+                pointer.isTouch = true;
+                pointer.x = pos.x;
+                pointer.y = Math.max(58, pos.y - 46);
+            }
+        }, { passive: true });
+
+        // Buton Etkileşimleri
+        startBtn.addEventListener('click', () => {
+            sound.init();
+            startGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            sound.init();
+            startGame();
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            if (gameState === 'PLAYING') {
+                pauseGame();
+            } else if (gameState === 'PAUSED') {
+                resumeGame();
+            }
+        });
+
+        if (resumeBtn) {
+            resumeBtn.addEventListener('click', () => resumeGame());
+        }
+
+        if (pauseRestartBtn) {
+            pauseRestartBtn.addEventListener('click', () => {
+                sound.init();
+                startGame();
+            });
+        }
+
+        soundToggleBtn.addEventListener('click', () => {
+            const isMuted = sound.toggleMute();
+            soundOnIcon.classList.toggle('hidden', isMuted);
+            soundOffIcon.classList.toggle('hidden', !isMuted);
+        });
+
+        // ==========================================
+        // 5. OYUN BAŞLATMA, DURAKLATMA VE BİTİRME
+        // ==========================================
+        function startGame() {
+            sound.init();
+            gameState = 'PLAYING';
+            score = 0;
+            difficultyLevel = 1;
+            lastDifficultyMilestone = 0;
+            milestone61Count = 0;
+
+            combo = 1;
+            comboTimer = 0;
+
+            hitStopTimer = 0;
+            shakeTimer = 0;
+            shakeMagnitude = 0;
+
+            hamsis = [];
+            collectibles = [];
+            powerups = [];
+            particles = [];
+            shockwaves = [];
+            floatingTexts = [];
+            jetTrail = [];
+
+            hamsiSpawnTimer = 0.45;
+            collectibleSpawnTimer = 0.25;
+            powerupSpawnTimer = 7.5;
+
+            player.x = width / 2;
+            player.y = height * 0.78;
+            player.vx = 0;
+            player.vy = 0;
+            player.tilt = 0;
+            player.alive = true;
+            player.invulnTimer = 0;
+            player.joyTimer = 0;
+            player.hasShield = false;
+            player.teaTimer = 0;
+            player.magnetTimer = 0;
+
+            pointer.active = false;
+            pointer.x = player.x;
+            pointer.y = player.y;
+
+            updateScoreUI();
+            updateComboUI();
+            updatePowerupHUD();
+
+            startScreenEl.classList.add('hidden');
+            if (pauseScreenEl) {
+                pauseScreenEl.classList.add('hidden');
+                pauseScreenEl.classList.remove('flex');
+            }
+            gameOverScreenEl.classList.add('hidden');
+            gameOverScreenEl.classList.remove('flex');
+
+            sound.startMusic();
+        }
+
+        function pauseGame() {
+            if (gameState !== 'PLAYING') return;
+            gameState = 'PAUSED';
+            sound.stopMusic(false);
+            if (pauseScreenEl) {
+                pauseScreenEl.classList.remove('hidden');
+                pauseScreenEl.classList.add('flex');
+            }
+        }
+
+        function resumeGame() {
+            if (gameState !== 'PAUSED') return;
+            gameState = 'PLAYING';
+            lastFrameTime = performance.now();
+            if (pauseScreenEl) {
+                pauseScreenEl.classList.add('hidden');
+                pauseScreenEl.classList.remove('flex');
+            }
+            if (!sound.muted) {
+                sound.startMusic();
+            }
+        }
+
+        function triggerGameOver() {
+            gameState = 'GAMEOVER';
+            gameOverTimestamp = performance.now();
+            player.alive = false;
+
+            sound.stopMusic(true);
+            sound.playGameOver();
+            hitStopTimer = 0.08;
+            triggerShake(0.55, 15);
+
+            // Bordo-Mavi patlama efekti
+            spawnExplosion(player.x, player.y, '#800020', 34);
+            spawnExplosion(player.x, player.y, '#38bdf8', 34);
+            shockwaves.push({
+                x: player.x,
+                y: player.y,
+                radius: 12,
+                maxRadius: 155,
+                color: '#38bdf8',
+                alpha: 1
+            });
+
+            // Rekor kontrolü
+            let isNewRecord = false;
+            if (score > highScore) {
+                highScore = score;
+                isNewRecord = true;
+                highScoreEl.textContent = highScore;
+                startHighScoreEl.textContent = highScore;
+                try {
+                    localStorage.setItem(STORAGE_KEY, String(highScore));
+                } catch (e) {}
+            }
+
+            if (gameOverSubtitleEl) {
+                gameOverSubtitleEl.textContent = GAME_OVER_QUOTES[Math.floor(Math.random() * GAME_OVER_QUOTES.length)];
+            }
+            finalScoreEl.textContent = score;
+            finalHighScoreEl.textContent = highScore;
+            newRecordBadgeEl.classList.toggle('hidden', !isNewRecord);
+
+            setTimeout(() => {
+                if (gameState === 'GAMEOVER') {
+                    gameOverScreenEl.classList.remove('hidden');
+                    gameOverScreenEl.classList.add('flex');
+                }
+            }, 620);
+        }
+
+        function triggerShake(duration, magnitude) {
+            shakeTimer = Math.max(shakeTimer, duration);
+            shakeMagnitude = Math.max(shakeMagnitude, magnitude);
+        }
+
+        // ==========================================
+        // 6. VARLIK OLUŞTURUCULAR (HAMSİ, FINDIK, GÜÇ)
+        // ==========================================
+        function spawnHamsi() {
+            const speedMult = 1 + (difficultyLevel - 1) * 0.12;
+            const roll = Math.random();
+            let variant = 'normal';
+            let radius = 19;
+            let baseSpeed = 210 + Math.random() * 75;
+
+            if (difficultyLevel >= 2 && roll < 0.28) {
+                // Hızlı Atik Hamsi
+                variant = 'fast';
+                radius = 15;
+                baseSpeed = 295 + Math.random() * 85;
+            } else if (difficultyLevel >= 3 && roll > 0.84) {
+                // Dev Kral Hamsi
+                variant = 'king';
+                radius = 29;
+                baseSpeed = 165 + Math.random() * 55;
+            }
+
+            const margin = radius + 16;
+            const x = margin + Math.random() * Math.max(20, width - margin * 2);
+            const y = -radius - 26;
+            const vx = (Math.random() - 0.5) * 85 * speedMult;
+            const vy = baseSpeed * speedMult;
+
+            hamsis.push({
+                variant,
+                x,
+                y,
+                vx,
+                vy,
+                radius,
+                wigglePhase: Math.random() * Math.PI * 2,
+                wiggleSpeed: variant === 'fast' ? 16 : 11
+            });
+        }
+
+        function spawnCollectible() {
+            const margin = 34;
+            const x = margin + Math.random() * Math.max(20, width - margin * 2);
+            const y = -24;
+            const vy = 155 + Math.random() * 60 + (difficultyLevel - 1) * 8;
+            // %55 ihtimalle Karadeniz Fındığı ("Uyyy!" sesli), %45 Bordo-Mavi Yıldız
+            const type = Math.random() < 0.55 ? 'hazelnut' : 'star';
+
+            collectibles.push({
+                type,
+                x,
+                y,
+                vx: (Math.random() - 0.5) * 28,
+                vy,
+                radius: type === 'hazelnut' ? 14 : 13,
+                pulse: Math.random() * Math.PI * 2,
+                rotation: (Math.random() - 0.5) * 0.5
+            });
+        }
+
+        function spawnPowerup() {
+            const types = ['shield', 'tea', 'magnet'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const margin = 44;
+            const x = margin + Math.random() * Math.max(20, width - margin * 2);
+            const y = -30;
+
+            powerups.push({
+                type,
+                x,
+                y,
+                vy: 145,
+                radius: 19,
+                pulse: 0
+            });
+        }
+
+        // ==========================================
+        // 7. PARÇACIK VE BİLDİRİM EFEKTLERİ
+        // ==========================================
+        function spawnExplosion(x, y, color, count = 20) {
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 55 + Math.random() * 250;
+                particles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: 2.2 + Math.random() * 3.8,
+                    color,
+                    alpha: 1,
+                    decay: 1.45 + Math.random() * 1.1
+                });
+            }
+        }
+
+        function addFloatingText(x, y, text, color) {
+            floatingTexts.push({
+                x,
+                y,
+                text,
+                color,
+                alpha: 1,
+                vy: -68
+            });
+        }
+
+        function showBanner(text) {
+            if (!speedBannerEl || !speedBannerTextEl) return;
+            speedBannerTextEl.textContent = text;
+            speedBannerEl.classList.remove('hidden', 'banner-anim');
+            void speedBannerEl.offsetWidth;
+            speedBannerEl.classList.add('banner-anim');
+        }
+
+        // ==========================================
+        // 8. HUD GÜNCELLEME FONKSİYONLARI
+        // ==========================================
+        function updateScoreUI() {
+            scoreEl.textContent = score;
+            if (score > highScore) {
+                highScoreEl.textContent = score;
+            }
+
+            // Her 61 puanda Trabzon Özel Bonusu
+            const current61 = Math.floor(score / 61);
+            if (current61 > milestone61Count) {
+                milestone61Count = current61;
+                score += 61;
+                scoreEl.textContent = score;
+                sound.playBonus61();
+                showBanner('★ 61 TRABZON BONUSU! +61 ★');
+                spawnExplosion(player.x, player.y, '#800020', 18);
+                spawnExplosion(player.x, player.y, '#38bdf8', 18);
+                addFloatingText(player.x, player.y - 26, '+61 TRABZON!', '#38bdf8');
+            }
+
+            // Her 120 puanda hamsi sürüsü hızlanır
+            const milestone = Math.floor(score / 120);
+            if (milestone > lastDifficultyMilestone) {
+                lastDifficultyMilestone = milestone;
+                difficultyLevel = milestone + 1;
+                showBanner('Hamsi Sürüsü Hızlanıyor!');
+            }
+        }
+
+        function updateComboUI() {
+            comboMultEl.textContent = `x${combo}`;
+            const pct = combo > 1 ? Math.max(0, (comboTimer / COMBO_WINDOW) * 100) : 0;
+            comboBarEl.style.width = `${pct}%`;
+
+            if (combo >= 4) {
+                comboMultEl.className = 'font-display text-sm font-black text-amber-300 leading-none';
+            } else if (combo >= 2) {
+                comboMultEl.className = 'font-display text-sm font-black text-sky-300 leading-none';
+            } else {
+                comboMultEl.className = 'font-display text-sm font-bold text-slate-400 leading-none';
+            }
+        }
+
+        function updatePowerupHUD() {
+            const items = [];
+            if (player.hasShield) {
+                items.push({
+                    label: 'B-M Kalkan',
+                    barColor: 'bg-gradient-to-r from-[#800020] to-[#38bdf8]',
+                    borderColor: 'border-sky-400/50',
+                    textColor: 'text-sky-200',
+                    pct: 100
+                });
+            }
+            if (player.teaTimer > 0) {
+                items.push({
+                    label: 'İnce Belli Çay',
+                    barColor: 'bg-amber-400',
+                    borderColor: 'border-amber-400/50',
+                    textColor: 'text-amber-200',
+                    pct: (player.teaTimer / TEA_DURATION) * 100
+                });
+            }
+            if (player.magnetTimer > 0) {
+                items.push({
+                    label: 'Fındık Mıknatısı',
+                    barColor: 'bg-rose-400',
+                    borderColor: 'border-rose-400/50',
+                    textColor: 'text-rose-200',
+                    pct: (player.magnetTimer / MAGNET_DURATION) * 100
+                });
+            }
+
+            activePowerupsEl.innerHTML = items.map(item => `
+                <div class="bm-pill ${item.borderColor} rounded-full px-3.5 py-1 flex items-center gap-2.5 min-w-[155px] shadow">
+                    <span class="text-[11px] font-bold ${item.textColor} whitespace-nowrap">${item.label}</span>
+                    <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full ${item.barColor} rounded-full" style="width: ${item.pct.toFixed(1)}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==========================================
+        // 9. ANA GÜNCELLEME DÖNGÜSÜ (UPDATE)
+        // ==========================================
+        function update(dt) {
+            if (gameState === 'PAUSED') return;
+
+            if (hitStopTimer > 0) {
+                hitStopTimer = Math.max(0, hitStopTimer - dt);
+                return;
+            }
+
+            const isTeaActive = gameState === 'PLAYING' && player.teaTimer > 0;
+            const timeScale = isTeaActive ? 0.5 : 1.0;
+
+            // Arka plan yıldızlarını kaydır
+            for (let i = 0; i < bgStars.length; i++) {
+                const s = bgStars[i];
+                s.twinkle += 3.2 * dt;
+                s.y += s.speed * dt * (isTeaActive ? 0.55 : 1.0);
+                if (s.y > height + 5) {
+                    s.y = -5;
+                    s.x = Math.random() * width;
+                }
+            }
+
+            if (shakeTimer > 0) {
+                shakeTimer = Math.max(0, shakeTimer - dt);
+            }
+
+            // Parçacıkları güncelle
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.vx *= 0.95;
+                p.vy *= 0.95;
+                p.alpha -= p.decay * dt;
+                if (p.alpha <= 0) particles.splice(i, 1);
+            }
+
+            // Şok dalgalarını güncelle
+            for (let i = shockwaves.length - 1; i >= 0; i--) {
+                const sw = shockwaves[i];
+                sw.radius += (sw.maxRadius - sw.radius) * 7.5 * dt;
+                sw.alpha -= 1.85 * dt;
+                if (sw.alpha <= 0) shockwaves.splice(i, 1);
+            }
+
+            // Yüzen puan metinlerini güncelle
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y += ft.vy * dt;
+                ft.alpha -= 1.15 * dt;
+                if (ft.alpha <= 0) floatingTexts.splice(i, 1);
+            }
+
+            if (gameState !== 'PLAYING') return;
+
+            // Oyuncu hareket kontrolü
+            let moveX = 0;
+            let moveY = 0;
+            if (keys.ArrowLeft || keys.KeyA) moveX -= 1;
+            if (keys.ArrowRight || keys.KeyD) moveX += 1;
+            if (keys.ArrowUp || keys.KeyW) moveY -= 1;
+            if (keys.ArrowDown || keys.KeyS) moveY += 1;
+
+            if (moveX !== 0 || moveY !== 0) {
+                const len = Math.hypot(moveX, moveY);
+                moveX /= len;
+                moveY /= len;
+                player.vx = moveX * player.speed;
+                player.vy = moveY * player.speed;
+                player.x += player.vx * dt;
+                player.y += player.vy * dt;
+            } else if (pointer.active) {
+                const dx = pointer.x - player.x;
+                const dy = pointer.y - player.y;
+                const followSpeed = pointer.isTouch ? 19 : 15;
+                player.vx = dx * followSpeed;
+                player.vy = dy * followSpeed;
+                player.x += player.vx * dt;
+                player.y += player.vy * dt;
+            } else {
+                player.vx *= 0.82;
+                player.vy *= 0.82;
+            }
+
+            // Ekran sınırları
+            const pad = player.radius + 10;
+            player.x = Math.max(pad, Math.min(width - pad, player.x));
+            player.y = Math.max(pad + 56, Math.min(height - pad - 8, player.y));
+
+            const targetTilt = Math.max(-0.36, Math.min(0.36, player.vx / 950));
+            player.tilt += (targetTilt - player.tilt) * 14 * dt;
+
+            if (player.invulnTimer > 0) player.invulnTimer = Math.max(0, player.invulnTimer - dt);
+            if (player.joyTimer > 0) player.joyTimer = Math.max(0, player.joyTimer - dt);
+
+            // Bordo-Mavi Jetpack İzi
+            jetTrail.push({
+                x: player.x + (Math.random() - 0.5) * 10,
+                y: player.y + player.radius + 8,
+                color: Math.random() > 0.5 ? '#800020' : '#38bdf8',
+                alpha: 0.9,
+                size: 6.5
+            });
+            for (let i = jetTrail.length - 1; i >= 0; i--) {
+                const jt = jetTrail[i];
+                jt.y += 145 * dt;
+                jt.alpha -= 3.5 * dt;
+                jt.size *= 0.95;
+                if (jt.alpha <= 0) jetTrail.splice(i, 1);
+            }
+
+            // Kombo & Güçlendirme Sayaçları
+            if (combo > 1) {
+                comboTimer -= dt;
+                if (comboTimer <= 0) {
+                    combo = 1;
+                    comboTimer = 0;
+                }
+                updateComboUI();
+            }
+
+            let refreshHud = false;
+            if (player.teaTimer > 0) {
+                player.teaTimer = Math.max(0, player.teaTimer - dt);
+                refreshHud = true;
+            }
+            if (player.magnetTimer > 0) {
+                player.magnetTimer = Math.max(0, player.magnetTimer - dt);
+                refreshHud = true;
+            }
+            if (refreshHud) updatePowerupHUD();
+
+            // Varlık Doğurma Zamanlayıcıları
+            const hamsiInterval = Math.max(0.28, 0.85 - (difficultyLevel - 1) * 0.06);
+            hamsiSpawnTimer -= dt * timeScale;
+            if (hamsiSpawnTimer <= 0) {
+                spawnHamsi();
+                hamsiSpawnTimer = hamsiInterval * (0.75 + Math.random() * 0.5);
+            }
+
+            collectibleSpawnTimer -= dt;
+            if (collectibleSpawnTimer <= 0) {
+                spawnCollectible();
+                collectibleSpawnTimer = 0.82 + Math.random() * 0.52;
+            }
+
+            powerupSpawnTimer -= dt;
+            if (powerupSpawnTimer <= 0) {
+                spawnPowerup();
+                powerupSpawnTimer = 11.5 + Math.random() * 5.0;
+            }
+
+            // Fındık ve Yıldızları Güncelle
+            const magnetRange = 235;
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                const c = collectibles[i];
+                c.pulse += 5.2 * dt;
+                c.rotation += (c.type === 'star' ? 2.1 : 1.1) * dt;
+
+                if (player.magnetTimer > 0) {
+                    const dx = player.x - c.x;
+                    const dy = player.y - c.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < magnetRange && dist > 1) {
+                        const pull = 540 * (1 - dist / magnetRange) + 210;
+                        c.x += (dx / dist) * pull * dt;
+                        c.y += (dy / dist) * pull * dt;
+                    } else {
+                        c.x += c.vx * dt;
+                        c.y += c.vy * dt;
+                    }
+                } else {
+                    c.x += c.vx * dt;
+                    c.y += c.vy * dt;
+                }
+
+                const distToPlayer = Math.hypot(player.x - c.x, player.y - c.y);
+                if (distToPlayer < player.radius + c.radius + 7) {
+                    if (comboTimer > 0) {
+                        combo = Math.min(5, combo + 1);
+                    } else {
+                        combo = 1;
+                    }
+                    comboTimer = COMBO_WINDOW;
+                    player.joyTimer = 0.65;
+
+                    const basePts = c.type === 'hazelnut' ? 15 : 10;
+                    const earned = basePts * combo;
+                    score += earned;
+
+                    if (c.type === 'hazelnut') {
+                        sound.playUyyy();
+                        spawnExplosion(c.x, c.y, '#d97706', 14);
+                        addFloatingText(c.x, c.y - 12, `UYYY! +${earned}`, '#fde047');
+                    } else {
+                        sound.playCollect(combo);
+                        spawnExplosion(c.x, c.y, '#38bdf8', 12);
+                        spawnExplosion(c.x, c.y, '#800020', 8);
+                        addFloatingText(c.x, c.y - 12, `+${earned}`, '#7dd3fc');
+                    }
+
+                    updateScoreUI();
+                    updateComboUI();
+                    collectibles.splice(i, 1);
+                    continue;
+                }
+
+                if (c.y > height + 40) {
+                    collectibles.splice(i, 1);
+                }
+            }
+
+            // Güçlendirmeleri Güncelle
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const pu = powerups[i];
+                pu.pulse += 4.6 * dt;
+                pu.y += pu.vy * dt;
+
+                const dist = Math.hypot(player.x - pu.x, player.y - pu.y);
+                if (dist < player.radius + pu.radius + 7) {
+                    sound.playPowerup(pu.type);
+                    player.joyTimer = 0.8;
+
+                    if (pu.type === 'shield') {
+                        player.hasShield = true;
+                        spawnExplosion(pu.x, pu.y, '#38bdf8', 22);
+                        addFloatingText(pu.x, pu.y - 14, 'B-M KALKAN!', '#7dd3fc');
+                    } else if (pu.type === 'tea') {
+                        player.teaTimer = TEA_DURATION;
+                        spawnExplosion(pu.x, pu.y, '#f59e0b', 22);
+                        addFloatingText(pu.x, pu.y - 14, 'İNCE BELLİ ÇAY!', '#fcd34d');
+                    } else if (pu.type === 'magnet') {
+                        player.magnetTimer = MAGNET_DURATION;
+                        spawnExplosion(pu.x, pu.y, '#fb7185', 22);
+                        addFloatingText(pu.x, pu.y - 14, 'FINDIK MIKNATISI!', '#fda4af');
+                    }
+
+                    shockwaves.push({
+                        x: pu.x,
+                        y: pu.y,
+                        radius: 10,
+                        maxRadius: 95,
+                        color: pu.type === 'shield' ? '#38bdf8' : pu.type === 'tea' ? '#f59e0b' : '#fb7185',
+                        alpha: 0.9
+                    });
+
+                    updatePowerupHUD();
+                    powerups.splice(i, 1);
+                    continue;
+                }
+
+                if (pu.y > height + 50) {
+                    powerups.splice(i, 1);
+                }
+            }
+
+            // Uzay Hamsilerini Güncelle & Çarpışma Kontrolü
+            for (let i = hamsis.length - 1; i >= 0; i--) {
+                const h = hamsis[i];
+                h.wigglePhase += h.wiggleSpeed * dt * timeScale;
+                const swimSway = Math.cos(h.wigglePhase * 0.5) * 42;
+
+                h.x += (h.vx + swimSway) * dt * timeScale;
+                h.y += h.vy * dt * timeScale;
+
+                // Ekran kenarlarından yumuşak sekme
+                if (h.x < h.radius + 8) {
+                    h.x = h.radius + 8;
+                    h.vx = Math.abs(h.vx);
+                } else if (h.x > width - h.radius - 8) {
+                    h.x = width - h.radius - 8;
+                    h.vx = -Math.abs(h.vx);
+                }
+
+                const hitDist = player.radius * 0.78 + h.radius * 0.76;
+                const dist = Math.hypot(player.x - h.x, player.y - h.y);
+
+                if (dist < hitDist && player.invulnTimer <= 0) {
+                    if (player.hasShield) {
+                        player.hasShield = false;
+                        player.invulnTimer = 0.55;
+                        score += 25;
+                        sound.playShieldBounce();
+                        triggerShake(0.28, 9);
+
+                        spawnExplosion(h.x, h.y, '#800020', 18);
+                        spawnExplosion(h.x, h.y, '#38bdf8', 20);
+                        shockwaves.push({
+                            x: player.x,
+                            y: player.y,
+                            radius: 14,
+                            maxRadius: 110,
+                            color: '#38bdf8',
+                            alpha: 1
+                        });
+                        addFloatingText(h.x, h.y, 'KALKAN SAVURDU! +25', '#7dd3fc');
+
+                        updateScoreUI();
+                        updatePowerupHUD();
+                        hamsis.splice(i, 1);
+                        continue;
+                    } else {
+                        triggerGameOver();
+                        return;
+                    }
+                }
+
+                if (h.y > height + h.radius + 60) {
+                    hamsis.splice(i, 1);
+                }
+            }
+        }
+
+        // ==========================================
+        // 10. ÇİZİM MOTORU (KARAKTER, KOMİK ŞAPKA, HAMSİ)
+        // ==========================================
+        function draw() {
+            ctx.save();
+
+            if (shakeTimer > 0) {
+                const mag = shakeMagnitude * (shakeTimer / 0.55);
+                ctx.translate((Math.random() - 0.5) * 2 * mag, (Math.random() - 0.5) * 2 * mag);
+            }
+
+            // Derin Uzay Arka Planı
+            ctx.fillStyle = '#070812';
+            ctx.fillRect(-20, -20, width + 40, height + 40);
+
+            // Bordo-Mavi Nebula Işıltısı
+            const nebula = ctx.createRadialGradient(width * 0.5, height * 0.35, 25, width * 0.5, height * 0.35, Math.max(width, height) * 0.8);
+            if (gameState === 'PLAYING' && player.teaTimer > 0) {
+                nebula.addColorStop(0, 'rgba(245, 158, 11, 0.14)');
+                nebula.addColorStop(0.55, 'rgba(128, 0, 32, 0.10)');
+                nebula.addColorStop(1, 'rgba(7, 8, 18, 0)');
+            } else {
+                nebula.addColorStop(0, 'rgba(56, 189, 248, 0.10)');
+                nebula.addColorStop(0.5, 'rgba(128, 0, 32, 0.12)');
+                nebula.addColorStop(1, 'rgba(7, 8, 18, 0)');
+            }
+            ctx.fillStyle = nebula;
+            ctx.fillRect(0, 0, width, height);
+
+            // Yıldızlar
+            for (let i = 0; i < bgStars.length; i++) {
+                const s = bgStars[i];
+                ctx.globalAlpha = s.alpha * (0.75 + 0.25 * Math.sin(s.twinkle));
+                ctx.fillStyle = s.color;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // Şok Dalgaları
+            for (let i = 0; i < shockwaves.length; i++) {
+                const sw = shockwaves[i];
+                ctx.save();
+                ctx.strokeStyle = sw.color;
+                ctx.globalAlpha = Math.max(0, sw.alpha);
+                ctx.lineWidth = 3;
+                ctx.shadowColor = sw.color;
+                ctx.shadowBlur = 14;
+                ctx.beginPath();
+                ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Fındıklar ve Bordo-Mavi Yıldızlar
+            for (let i = 0; i < collectibles.length; i++) {
+                drawCollectibleEntity(collectibles[i]);
+            }
+
+            // Güçlendirmeler
+            for (let i = 0; i < powerups.length; i++) {
+                drawPowerupEntity(powerups[i]);
+            }
+
+            // Uzay Hamsileri
+            for (let i = 0; i < hamsis.length; i++) {
+                drawHamsiEntity(hamsis[i]);
+            }
+
+            // Oyuncu Kahraman ve Jetpack İzi
+            if (player.alive) {
+                drawJetpackTrail();
+                drawTrabzonHero(
+                    ctx,
+                    player.x,
+                    player.y,
+                    player.radius,
+                    player.tilt,
+                    performance.now(),
+                    player.joyTimer,
+                    player.hasShield,
+                    player.magnetTimer
+                );
+            }
+
+            // Parçacıklar
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+
+            // Yüzen Puan Yazıları
+            for (let i = 0; i < floatingTexts.length; i++) {
+                const ft = floatingTexts[i];
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, ft.alpha);
+                ctx.font = '900 16px "Exo 2", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = ft.color;
+                ctx.shadowColor = 'rgba(0,0,0,0.85)';
+                ctx.shadowBlur = 8;
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        function drawCollectibleEntity(c) {
+            ctx.save();
+            ctx.translate(c.x, c.y);
+            ctx.rotate(c.rotation);
+            const scale = 1 + Math.sin(c.pulse) * 0.1;
+            ctx.scale(scale, scale);
+
+            if (c.type === 'hazelnut') {
+                // Karadeniz Fındığı
+                ctx.shadowColor = '#f59e0b';
+                ctx.shadowBlur = 14;
+
+                ctx.beginPath();
+                ctx.moveTo(0, -13);
+                ctx.bezierCurveTo(11, -9, 13, 4, 8, 10);
+                ctx.quadraticCurveTo(0, 14, -8, 10);
+                ctx.bezierCurveTo(-13, 4, -11, -9, 0, -13);
+                ctx.closePath();
+
+                const nutGrad = ctx.createRadialGradient(-3, -4, 2, 0, 0, 14);
+                nutGrad.addColorStop(0, '#f59e0b');
+                nutGrad.addColorStop(0.55, '#92400e');
+                nutGrad.addColorStop(1, '#451a03');
+                ctx.fillStyle = nutGrad;
+                ctx.fill();
+
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#fde68a';
+                ctx.stroke();
+
+                // Fındık alt tabanı
+                ctx.beginPath();
+                ctx.ellipse(0, 9.5, 6.5, 3.2, 0, 0, Math.PI * 2);
+                ctx.fillStyle = '#fef3c7';
+                ctx.fill();
+            } else {
+                // Bordo-Mavi Yıldız
+                ctx.shadowColor = '#38bdf8';
+                ctx.shadowBlur = 16;
+
+                const outerR = c.radius;
+                const innerR = c.radius * 0.48;
+                ctx.beginPath();
+                for (let i = 0; i < 10; i++) {
+                    const r = i % 2 === 0 ? outerR : innerR;
+                    const angle = (i * Math.PI) / 5 - Math.PI / 2;
+                    const px = Math.cos(angle) * r;
+                    const py = Math.sin(angle) * r;
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+
+                const starGrad = ctx.createLinearGradient(-outerR, -outerR, outerR, outerR);
+                starGrad.addColorStop(0, '#800020');
+                starGrad.addColorStop(0.5, '#e11d48');
+                starGrad.addColorStop(1, '#38bdf8');
+                ctx.fillStyle = starGrad;
+                ctx.fill();
+
+                ctx.lineWidth = 1.4;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function drawPowerupEntity(pu) {
+            ctx.save();
+            ctx.translate(pu.x, pu.y);
+            const scale = 1 + Math.sin(pu.pulse) * 0.08;
+            ctx.scale(scale, scale);
+
+            let ringColor = '#38bdf8';
+            let bgFill = 'rgba(56, 189, 248, 0.22)';
+            if (pu.type === 'tea') {
+                ringColor = '#f59e0b';
+                bgFill = 'rgba(245, 158, 11, 0.22)';
+            } else if (pu.type === 'magnet') {
+                ringColor = '#fb7185';
+                bgFill = 'rgba(251, 113, 133, 0.22)';
+            }
+
+            ctx.shadowColor = ringColor;
+            ctx.shadowBlur = 16;
+
+            ctx.beginPath();
+            ctx.arc(0, 0, pu.radius, 0, Math.PI * 2);
+            ctx.fillStyle = bgFill;
+            ctx.fill();
+            ctx.lineWidth = 2.4;
+            ctx.strokeStyle = ringColor;
+            ctx.stroke();
+
+            if (pu.type === 'shield') {
+                // Bordo-Mavi Kalkan İkonu
+                ctx.beginPath();
+                ctx.moveTo(0, -9);
+                ctx.lineTo(8, -5);
+                ctx.lineTo(8, 2);
+                ctx.quadraticCurveTo(8, 8, 0, 10.5);
+                ctx.quadraticCurveTo(-8, 8, -8, 2);
+                ctx.lineTo(-8, -5);
+                ctx.closePath();
+                const sGrad = ctx.createLinearGradient(-8, 0, 8, 0);
+                sGrad.addColorStop(0, '#800020');
+                sGrad.addColorStop(1, '#38bdf8');
+                ctx.fillStyle = sGrad;
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            } else if (pu.type === 'tea') {
+                // İnce Belli Çay Bardağı
+                ctx.beginPath();
+                ctx.moveTo(-5, -7);
+                ctx.quadraticCurveTo(-3, 0, -6, 7);
+                ctx.lineTo(6, 7);
+                ctx.quadraticCurveTo(3, 0, 5, -7);
+                ctx.closePath();
+                ctx.fillStyle = '#b91c1c';
+                ctx.fill();
+                ctx.strokeStyle = '#fef3c7';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Çay tabağı
+                ctx.beginPath();
+                ctx.moveTo(-8.5, 8.5);
+                ctx.lineTo(8.5, 8.5);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            } else if (pu.type === 'magnet') {
+                // Fındık Mıknatısı İkonu
+                ctx.strokeStyle = '#fda4af';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.arc(0, 1, 6, 0, Math.PI, false);
+                ctx.lineTo(-6, -6);
+                ctx.moveTo(6, 1);
+                ctx.lineTo(6, -6);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function drawHamsiEntity(h) {
+            ctx.save();
+            ctx.translate(h.x, h.y);
+
+            const wag = Math.sin(h.wigglePhase) * 0.24;
+            ctx.rotate(wag * 0.35);
+
+            const r = h.radius;
+            const bodyLen = r * 1.45;
+            const bodyWidth = r * 0.56;
+
+            // Kuyruk yüzgeci (üstte, aşağı yüzen hamsi)
+            ctx.save();
+            ctx.translate(0, -bodyLen * 0.85);
+            ctx.rotate(wag * 1.5);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-bodyWidth * 0.95, -r * 0.72);
+            ctx.lineTo(0, -r * 0.42);
+            ctx.lineTo(bodyWidth * 0.95, -r * 0.72);
+            ctx.closePath();
+            ctx.fillStyle = h.variant === 'king' ? '#f59e0b' : '#38bdf8';
+            ctx.fill();
+            ctx.restore();
+
+            // Yan yüzgeçler
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.85)';
+            ctx.beginPath();
+            ctx.moveTo(-bodyWidth * 0.75, 0);
+            ctx.lineTo(-bodyWidth * 1.45, -r * 0.35);
+            ctx.lineTo(-bodyWidth * 0.65, r * 0.3);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(bodyWidth * 0.75, 0);
+            ctx.lineTo(bodyWidth * 1.45, -r * 0.35);
+            ctx.lineTo(bodyWidth * 0.65, r * 0.3);
+            ctx.closePath();
+            ctx.fill();
+
+            // Hamsi Gövdesi
+            ctx.beginPath();
+            ctx.moveTo(0, bodyLen); // Burun (aşağı bakıyor)
+            ctx.bezierCurveTo(bodyWidth * 1.15, bodyLen * 0.35, bodyWidth * 1.05, -bodyLen * 0.45, 0, -bodyLen * 0.9);
+            ctx.bezierCurveTo(-bodyWidth * 1.05, -bodyLen * 0.45, -bodyWidth * 1.15, bodyLen * 0.35, 0, bodyLen);
+            ctx.closePath();
+
+            const fishGrad = ctx.createLinearGradient(-bodyWidth, 0, bodyWidth, 0);
+            if (h.variant === 'fast') {
+                fishGrad.addColorStop(0, '#0369a1');
+                fishGrad.addColorStop(0.5, '#7dd3fc');
+                fishGrad.addColorStop(1, '#0284c7');
+            } else if (h.variant === 'king') {
+                fishGrad.addColorStop(0, '#7A0026');
+                fishGrad.addColorStop(0.5, '#e2e8f0');
+                fishGrad.addColorStop(1, '#0284c7');
+            } else {
+                fishGrad.addColorStop(0, '#1e3a8a');
+                fishGrad.addColorStop(0.45, '#e2e8f0');
+                fishGrad.addColorStop(0.75, '#94a3b8');
+                fishGrad.addColorStop(1, '#0f172a');
+            }
+            ctx.fillStyle = fishGrad;
+            ctx.fill();
+
+            ctx.lineWidth = 1.4;
+            ctx.strokeStyle = h.variant === 'king' ? '#fde047' : '#bae6fd';
+            ctx.stroke();
+
+            // Solungaç çizgisi
+            ctx.beginPath();
+            ctx.arc(0, bodyLen * 0.38, bodyWidth * 0.65, Math.PI * 0.15, Math.PI * 0.85);
+            ctx.strokeStyle = 'rgba(15, 23, 42, 0.65)';
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+
+            // Hamsi Gözü
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(bodyWidth * 0.36, bodyLen * 0.56, r * 0.16, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#090a14';
+            ctx.beginPath();
+            ctx.arc(bodyWidth * 0.38, bodyLen * 0.6, r * 0.08, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawJetpackTrail() {
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            for (let i = 0; i < jetTrail.length; i++) {
+                const jt = jetTrail[i];
+                ctx.globalAlpha = Math.max(0, jt.alpha * 0.75);
+                ctx.fillStyle = jt.color;
+                ctx.beginPath();
+                ctx.arc(jt.x, jt.y, jt.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        function drawTrabzonHero(targetCtx, x, y, radius, tilt, timeMs, joyTimer, hasShield, magnetTimer) {
+            targetCtx.save();
+            targetCtx.translate(x, y);
+
+            // Mıknatıs manyetik dalgası
+            if (magnetTimer > 0) {
+                const wave = (timeMs % 950) / 950;
+                targetCtx.save();
+                targetCtx.strokeStyle = `rgba(251, 113, 133, ${0.48 * (1 - wave)})`;
+                targetCtx.lineWidth = 2;
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius + 12 + wave * 34, 0, Math.PI * 2);
+                targetCtx.stroke();
+                targetCtx.restore();
+            }
+
+            // Sevinç halesi (Fındık / Yıldız toplandığında)
+            if (joyTimer > 0) {
+                targetCtx.save();
+                targetCtx.strokeStyle = `rgba(253, 224, 71, ${Math.min(0.85, joyTimer)})`;
+                targetCtx.lineWidth = 3;
+                targetCtx.shadowColor = '#fde047';
+                targetCtx.shadowBlur = 16;
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius + 9, 0, Math.PI * 2);
+                targetCtx.stroke();
+                targetCtx.restore();
+            }
+
+            // Bordo-Mavi Enerji Kalkanı
+            if (hasShield) {
+                targetCtx.save();
+                const shieldGrad = targetCtx.createLinearGradient(-radius, -radius, radius, radius);
+                shieldGrad.addColorStop(0, '#e11d48');
+                shieldGrad.addColorStop(1, '#38bdf8');
+                targetCtx.strokeStyle = shieldGrad;
+                targetCtx.shadowColor = '#38bdf8';
+                targetCtx.shadowBlur = 18;
+                targetCtx.lineWidth = 3;
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius + 13, 0, Math.PI * 2);
+                targetCtx.stroke();
+
+                targetCtx.fillStyle = 'rgba(56, 189, 248, 0.12)';
+                targetCtx.fill();
+                targetCtx.restore();
+            }
+
+            targetCtx.rotate(tilt);
+
+            const faceR = radius * 0.78;
+            const faceY = 2;
+
+            // 1. BORDO-MAVİ UZAY KIYAFETİ GÖVDESİ (61 ROZETLİ)
+            targetCtx.save();
+            targetCtx.beginPath();
+            targetCtx.roundRect(-radius * 0.72, faceY + faceR * 0.65, radius * 1.44, radius * 0.85, 9);
+            const suitGrad = targetCtx.createLinearGradient(-radius * 0.72, 0, radius * 0.72, 0);
+            suitGrad.addColorStop(0, '#7A0026');
+            suitGrad.addColorStop(0.5, '#00AEEF');
+            suitGrad.addColorStop(1, '#7A0026');
+            targetCtx.fillStyle = suitGrad;
+            targetCtx.fill();
+            targetCtx.lineWidth = 1.6;
+            targetCtx.strokeStyle = '#ffffff';
+            targetCtx.stroke();
+
+            // Göğüste 61 yazısı
+            targetCtx.fillStyle = '#ffffff';
+            targetCtx.font = `900 ${Math.round(radius * 0.44)}px "Exo 2", sans-serif`;
+            targetCtx.textAlign = 'center';
+            targetCtx.textBaseline = 'middle';
+            targetCtx.fillText('61', 0, faceY + faceR * 1.12);
+            targetCtx.restore();
+
+            // 2. KIZIN YÜZ PORTESİ (BORDO-MAVİ PARLAYAN KASK ÇERÇEVESİ)
+            targetCtx.save();
+            targetCtx.beginPath();
+            targetCtx.arc(0, faceY, faceR, 0, Math.PI * 2);
+            targetCtx.closePath();
+            targetCtx.clip();
+
+            if (faceImg && faceImg.complete && faceImg.naturalWidth > 0) {
+                targetCtx.drawImage(faceImg, -faceR, faceY - faceR, faceR * 2, faceR * 2);
+            } else {
+                targetCtx.fillStyle = '#fde68a';
+                targetCtx.fillRect(-faceR, faceY - faceR, faceR * 2, faceR * 2);
+            }
+            targetCtx.restore();
+
+            // Kask çerçeve halkası
+            const ringGrad = targetCtx.createLinearGradient(-faceR, faceY - faceR, faceR, faceY + faceR);
+            ringGrad.addColorStop(0, '#7A0026');
+            ringGrad.addColorStop(0.5, '#ffffff');
+            ringGrad.addColorStop(1, '#00AEEF');
+            targetCtx.strokeStyle = ringGrad;
+            targetCtx.lineWidth = 2.8;
+            targetCtx.beginPath();
+            targetCtx.arc(0, faceY, faceR, 0, Math.PI * 2);
+            targetCtx.stroke();
+
+            // 3. KOMİK TS 61 TRABZONSPOR ŞAPKASI (PERVANELİ & PONPONLU)
+            const capBaseY = faceY - faceR * 0.72;
+            const capW = faceR * 1.18;
+            const capH = faceR * 0.92;
+            const swing = Math.sin(timeMs * 0.009) * 0.16 - tilt * 1.3;
+
+            // Sallanan Ponponlu Kulaklıklar (Sol ve Sağ)
+            [-1, 1].forEach((side) => {
+                targetCtx.save();
+                targetCtx.translate(side * (capW * 0.92), capBaseY + 1);
+                targetCtx.rotate(swing + side * 0.15);
+
+                // İp / kulaklık şeridi
+                targetCtx.strokeStyle = side === -1 ? '#7A0026' : '#00AEEF';
+                targetCtx.lineWidth = 3.5;
+                targetCtx.lineCap = 'round';
+                targetCtx.beginPath();
+                targetCtx.moveTo(0, 0);
+                targetCtx.lineTo(side * 4, faceR * 0.95);
+                targetCtx.stroke();
+
+                // Uçtaki kabarık Bordo-Mavi ponpon
+                targetCtx.beginPath();
+                targetCtx.arc(side * 4, faceR * 1.02, 5.2, 0, Math.PI * 2);
+                targetCtx.fillStyle = side === -1 ? '#00AEEF' : '#7A0026';
+                targetCtx.fill();
+                targetCtx.lineWidth = 1.2;
+                targetCtx.strokeStyle = '#ffffff';
+                ctx.stroke && targetCtx.stroke();
+                targetCtx.restore();
+            });
+
+            // 4 Dilimli Kabarık Şapka Kubbesi
+            targetCtx.save();
+            targetCtx.beginPath();
+            targetCtx.ellipse(0, capBaseY, capW, capH, 0, Math.PI, 0, false);
+            targetCtx.closePath();
+
+            const domeGrad = targetCtx.createLinearGradient(-capW, capBaseY, capW, capBaseY);
+            domeGrad.addColorStop(0, '#7A0026');
+            domeGrad.addColorStop(0.28, '#7A0026');
+            domeGrad.addColorStop(0.32, '#00AEEF');
+            domeGrad.addColorStop(0.68, '#00AEEF');
+            domeGrad.addColorStop(0.72, '#7A0026');
+            domeGrad.addColorStop(1, '#7A0026');
+            targetCtx.fillStyle = domeGrad;
+            targetCtx.fill();
+            targetCtx.lineWidth = 1.8;
+            targetCtx.strokeStyle = '#ffffff';
+            targetCtx.stroke();
+
+            // Şapka üzerindeki TS 61 Arması
+            targetCtx.fillStyle = '#fde047';
+            targetCtx.font = `900 ${Math.max(8, Math.round(radius * 0.34))}px "Exo 2", sans-serif`;
+            targetCtx.textAlign = 'center';
+            targetCtx.textBaseline = 'middle';
+            targetCtx.fillText('TS 61', 0, capBaseY - capH * 0.44);
+
+            // Dev Komik Kavisli Siperlik (hafif yana yamuk)
+            targetCtx.save();
+            targetCtx.translate(2, capBaseY + 1);
+            targetCtx.rotate(0.08);
+            targetCtx.beginPath();
+            targetCtx.ellipse(0, 0, capW * 1.15, capH * 0.28, 0, 0, Math.PI * 2);
+            const visorGrad = targetCtx.createLinearGradient(-capW, 0, capW, 0);
+            visorGrad.addColorStop(0, '#00AEEF');
+            visorGrad.addColorStop(0.5, '#7A0026');
+            visorGrad.addColorStop(1, '#00AEEF');
+            targetCtx.fillStyle = visorGrad;
+            targetCtx.fill();
+            targetCtx.lineWidth = 1.4;
+            targetCtx.strokeStyle = '#ffffff';
+            targetCtx.stroke();
+            targetCtx.restore();
+
+            // Tepede Dönen Bordo-Mavi Pervane!
+            const propTopY = capBaseY - capH - 5;
+            targetCtx.strokeStyle = '#fde047';
+            targetCtx.lineWidth = 2.4;
+            targetCtx.beginPath();
+            targetCtx.moveTo(0, capBaseY - capH + 1);
+            targetCtx.lineTo(0, propTopY);
+            targetCtx.stroke();
+
+            const spinRate = joyTimer > 0 ? 0.045 : 0.016;
+            const bladeSpan = Math.max(4, Math.abs(Math.cos(timeMs * spinRate)) * (capW * 1.05));
+
+            // Sol pervane kanadı (Bordo)
+            targetCtx.fillStyle = '#7A0026';
+            targetCtx.beginPath();
+            targetCtx.ellipse(-bladeSpan * 0.55, propTopY, bladeSpan * 0.55, 3.2, -0.08, 0, Math.PI * 2);
+            targetCtx.fill();
+            targetCtx.strokeStyle = '#ffffff';
+            targetCtx.lineWidth = 1;
+            targetCtx.stroke();
+
+            // Sağ pervane kanadı (Mavi)
+            targetCtx.fillStyle = '#00AEEF';
+            targetCtx.beginPath();
+            targetCtx.ellipse(bladeSpan * 0.55, propTopY, bladeSpan * 0.55, 3.2, 0.08, 0, Math.PI * 2);
+            targetCtx.fill();
+            targetCtx.stroke();
+
+            // Pervane merkez vidası
+            targetCtx.fillStyle = '#fde047';
+            targetCtx.beginPath();
+            targetCtx.arc(0, propTopY, 3, 0, Math.PI * 2);
+            targetCtx.fill();
+
+            targetCtx.restore();
+            targetCtx.restore();
+        }
+
+        function drawStartPreview(timestamp) {
+            if (!previewCtx || !previewCanvas || gameState !== 'START') return;
+            const pw = previewCanvas.width;
+            const ph = previewCanvas.height;
+            previewCtx.clearRect(0, 0, pw, ph);
+
+            const floatY = ph * 0.56 + Math.sin(timestamp * 0.004) * 3.5;
+            const gentleTilt = Math.sin(timestamp * 0.0025) * 0.08;
+            drawTrabzonHero(previewCtx, pw / 2, floatY, 30, gentleTilt, timestamp, 0, false, 0);
+        }
+
+        // ==========================================
+        // 11. CHROME PWA & MOBİL UYGULAMA ENTEGRASYONU
+        // ==========================================
+        let deferredInstallPrompt = null;
+        const installAppBtn = document.getElementById('installAppBtn');
+        const installModal = document.getElementById('installModal');
+        const closeInstallModalBtn = document.getElementById('closeInstallModalBtn');
+        const confirmInstallModalBtn = document.getElementById('confirmInstallModalBtn');
+
+        function setupPwaAndAppSupport() {
+            // Bordo-Mavi TS 61 Uygulama İkonu Üret (512x512)
+            try {
+                const iconCanvas = document.createElement('canvas');
+                iconCanvas.width = 512;
+                iconCanvas.height = 512;
+                const ictx = iconCanvas.getContext('2d');
+
+                const bgGrad = ictx.createLinearGradient(0, 0, 512, 512);
+                bgGrad.addColorStop(0, '#7A0026');
+                bgGrad.addColorStop(0.5, '#0b0d1c');
+                bgGrad.addColorStop(1, '#00AEEF');
+                ictx.fillStyle = bgGrad;
+                ictx.fillRect(0, 0, 512, 512);
+
+                ictx.strokeStyle = '#38bdf8';
+                ictx.lineWidth = 18;
+                ictx.beginPath();
+                ictx.arc(256, 256, 210, 0, Math.PI * 2);
+                ictx.stroke();
+
+                ictx.fillStyle = '#ffffff';
+                ictx.font = '900 128px "Exo 2", sans-serif';
+                ictx.textAlign = 'center';
+                ictx.textBaseline = 'middle';
+                ictx.fillText('TS 61', 256, 225);
+
+                ictx.fillStyle = '#fde047';
+                ictx.font = '800 54px "Exo 2", sans-serif';
+                ictx.fillText('KÜKÜ', 256, 330);
+
+                const iconDataUrl = iconCanvas.toDataURL('image/png');
+                const appleLink = document.getElementById('appleTouchIconLink');
+                if (appleLink) appleLink.href = 'kuku-icon.png';
+
+                // Dinamik Web App Manifest (Chrome "Uygulamayı Yükle" desteği)
+                const manifest = {
+                    name: 'Kükü — Bordo Mavi',
+                    short_name: 'Kükü',
+                    description: 'TS 61 şapkalı kahramanımızla uzay hamsilerinden kaç!',
+                    start_url: '.',
+                    display: 'standalone',
+                    orientation: 'portrait',
+                    background_color: '#070812',
+                    theme_color: '#800020',
+                    icons: [
+                        { src: 'kuku-icon.png', sizes: '192x192', type: 'image/png' },
+                        { src: 'kuku-icon.png', sizes: '512x512', type: 'image/png' }
+                    ]
+                };
+                const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+                const manifestLink = document.getElementById('pwaManifestLink');
+                if (manifestLink) manifestLink.href = URL.createObjectURL(manifestBlob);
+            } catch (e) {}
+
+            // HTTP/HTTPS üzerinden açıldığında çevrimdışı Service Worker kaydet
+            if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.protocol === 'http:')) {
+                try {
+                    const swCode = `
+                        const CACHE_NAME = 'hamsi-kacisi-v1';
+                        self.addEventListener('install', (e) => self.skipWaiting());
+                        self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+                        self.addEventListener('fetch', (e) => {
+                            e.respondWith(
+                                caches.match(e.request).then((cached) => cached || fetch(e.request).then((res) => {
+                                    const copy = res.clone();
+                                    caches.open(CACHE_NAME).then((cache) => cache.put(e.request, copy));
+                                    return res;
+                                }).catch(() => cached))
+                            );
+                        });
+                    `;
+                    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+                } catch (e) {}
+            }
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            if (installAppBtn) {
+                installAppBtn.innerHTML = '<span>📲 Chrome Uygulaması Olarak Kur</span>';
+            }
+        });
+
+        if (installAppBtn) {
+            installAppBtn.addEventListener('click', async () => {
+                if (deferredInstallPrompt) {
+                    deferredInstallPrompt.prompt();
+                    await deferredInstallPrompt.userChoice;
+                    deferredInstallPrompt = null;
+                } else if (installModal) {
+                    installModal.classList.remove('hidden');
+                    installModal.classList.add('flex');
+                }
+            });
+        }
+
+        [closeInstallModalBtn, confirmInstallModalBtn].forEach((btn) => {
+            if (btn && installModal) {
+                btn.addEventListener('click', () => {
+                    installModal.classList.add('hidden');
+                    installModal.classList.remove('flex');
+                });
+            }
+        });
+
+        // Sekme değiştirildiğinde veya telefon arka plana alındığında oyunu ve müziği otomatik duraklat
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && gameState === 'PLAYING') {
+                pauseGame();
+            }
+        });
+
+        // ==========================================
+        // 12. ANA OYUN DÖNGÜSÜ (WINDOW.ONLOAD)
+        // ==========================================
+        let lastFrameTime = 0;
+
+        function gameLoop(timestamp) {
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.05);
+            lastFrameTime = timestamp;
+
+            update(dt);
+            draw();
+            drawStartPreview(timestamp);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function () {
+            setupPwaAndAppSupport();
+            resizeCanvas();
+            sound.preloadUyyyVoices();
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
+</body>
+</html>
