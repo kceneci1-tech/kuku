@@ -553,14 +553,15 @@
                 subOsc.type = 'triangle';
 
                 // "U" başlangıcından tiz "yyy!" vurgusuna yükselen perde eğrisi
-                voiceOsc.frequency.setValueAtTime(165, now);
-                voiceOsc.frequency.exponentialRampToValueAtTime(285, now + 0.16);
-                voiceOsc.frequency.exponentialRampToValueAtTime(245, now + 0.32);
-                voiceOsc.frequency.exponentialRampToValueAtTime(185, now + duration);
+                // Daha tiz ve belirgin "Uyyy!" perdesi
+                voiceOsc.frequency.setValueAtTime(220, now);
+                voiceOsc.frequency.exponentialRampToValueAtTime(380, now + 0.16);
+                voiceOsc.frequency.exponentialRampToValueAtTime(330, now + 0.32);
+                voiceOsc.frequency.exponentialRampToValueAtTime(240, now + duration);
 
-                subOsc.frequency.setValueAtTime(82.5, now);
-                subOsc.frequency.exponentialRampToValueAtTime(142.5, now + 0.16);
-                subOsc.frequency.exponentialRampToValueAtTime(92.5, now + duration);
+                subOsc.frequency.setValueAtTime(110, now);
+                subOsc.frequency.exponentialRampToValueAtTime(190, now + 0.16);
+                subOsc.frequency.exponentialRampToValueAtTime(120, now + duration);
 
                 vibrato.frequency.setValueAtTime(6.5, now);
                 vibratoGain.gain.setValueAtTime(7, now);
