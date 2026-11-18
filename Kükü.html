@@ -540,7 +540,8 @@
             _playSynthUyyy() {
                 if (!this.ctx || this.muted) return;
                 const now = this.ctx.currentTime;
-                const duration = 0.44;
+                // Komik Trabzon uluması: alçak giriş, ani tiz çıkış ve titreşimli düşüş
+                const duration = 0.58;
                 const out = this.getOutputNode();
 
                 // Ses telleri (Glottal darbe + komik Karadeniz tonlaması: yükselip inen perde)
@@ -554,17 +555,17 @@
 
                 // "U" başlangıcından tiz "yyy!" vurgusuna yükselen perde eğrisi
                 // Daha tiz ve belirgin "Uyyy!" perdesi
-                voiceOsc.frequency.setValueAtTime(220, now);
-                voiceOsc.frequency.exponentialRampToValueAtTime(380, now + 0.16);
-                voiceOsc.frequency.exponentialRampToValueAtTime(330, now + 0.32);
-                voiceOsc.frequency.exponentialRampToValueAtTime(240, now + duration);
+                voiceOsc.frequency.setValueAtTime(190, now);
+                voiceOsc.frequency.exponentialRampToValueAtTime(470, now + 0.14);
+                voiceOsc.frequency.exponentialRampToValueAtTime(360, now + 0.30);
+                voiceOsc.frequency.exponentialRampToValueAtTime(155, now + duration);
 
-                subOsc.frequency.setValueAtTime(110, now);
-                subOsc.frequency.exponentialRampToValueAtTime(190, now + 0.16);
-                subOsc.frequency.exponentialRampToValueAtTime(120, now + duration);
+                subOsc.frequency.setValueAtTime(95, now);
+                subOsc.frequency.exponentialRampToValueAtTime(235, now + 0.14);
+                subOsc.frequency.exponentialRampToValueAtTime(105, now + duration);
 
-                vibrato.frequency.setValueAtTime(6.5, now);
-                vibratoGain.gain.setValueAtTime(7, now);
+                vibrato.frequency.setValueAtTime(8.5, now);
+                vibratoGain.gain.setValueAtTime(16, now);
                 vibrato.connect(vibratoGain);
                 vibratoGain.connect(voiceOsc.frequency);
 
@@ -579,19 +580,19 @@
                 f2.type = 'bandpass';
                 f2.Q.setValueAtTime(5.5, now);
                 f2.frequency.setValueAtTime(780, now);
-                f2.frequency.exponentialRampToValueAtTime(2250, now + 0.22);
-                f2.frequency.linearRampToValueAtTime(2400, now + duration);
+                f2.frequency.exponentialRampToValueAtTime(2700, now + 0.20);
+                f2.frequency.linearRampToValueAtTime(2100, now + duration);
 
                 const f3 = this.ctx.createBiquadFilter();
                 f3.type = 'bandpass';
                 f3.Q.setValueAtTime(6.0, now);
                 f3.frequency.setValueAtTime(2350, now);
-                f3.frequency.exponentialRampToValueAtTime(3050, now + 0.25);
+                f3.frequency.exponentialRampToValueAtTime(3600, now + 0.22);
 
                 const masterEnv = this.ctx.createGain();
                 masterEnv.gain.setValueAtTime(0.001, now);
-                masterEnv.gain.linearRampToValueAtTime(0.42, now + 0.045);
-                masterEnv.gain.setValueAtTime(0.38, now + 0.28);
+                masterEnv.gain.linearRampToValueAtTime(0.46, now + 0.045);
+                masterEnv.gain.setValueAtTime(0.40, now + 0.30);
                 masterEnv.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
                 const f1Gain = this.ctx.createGain(); f1Gain.gain.value = 1.4;
