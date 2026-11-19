@@ -173,6 +173,14 @@
                         </svg>
                     </button>
 
+                    <button id="homeBtn" type="button" aria-label="Ana menüye dön"
+                        class="pointer-events-auto bm-pill hover:bg-slate-800/90 active:scale-95 rounded-2xl p-2.5 text-rose-300 transition cursor-pointer flex items-center justify-center shadow-md">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.5 9.5V21h13V9.5M9.5 21v-6h5v6"></path>
+                        </svg>
+                    </button>
+
                     <div class="bm-pill rounded-2xl px-3 py-1.5 flex flex-col min-w-[78px] border-l-2 border-l-[#800020]">
                         <span class="text-[9px] font-bold uppercase tracking-wider text-sky-300/90">Skor</span>
                         <span id="scoreValue" class="font-display text-lg font-black text-white leading-tight">0</span>
@@ -237,13 +245,6 @@
                         <div class="relative w-[108px] h-[108px] rounded-full bg-[#090b1a]/90 border-2 border-sky-400/40 shadow-[0_0_25px_rgba(0,174,239,0.35)] flex items-center justify-center overflow-hidden">
                             <canvas id="previewCanvas" width="108" height="108" class="w-full h-full"></canvas>
                         </div>
-                    </div>
-
-                    <!-- Özel Sevgi Mesajı -->
-                    <div class="my-1.5 px-4 py-1.5 rounded-2xl bg-gradient-to-r from-[#800020]/80 via-rose-600/55 to-[#0284c7]/70 border border-rose-300/50 shadow-[0_0_20px_rgba(244,63,94,0.45)] badge-pulse">
-                        <p class="font-display text-sm sm:text-base font-extrabold tracking-wide text-white">
-                            ❤️ Kürşad seni çok seviyor ❤️
-                        </p>
                     </div>
 
                     <h1 class="font-display text-2xl sm:text-3xl font-black tracking-tight text-white bm-title-glow leading-tight mt-1 mb-1.5">
@@ -930,6 +931,7 @@
 
         const startBtn = document.getElementById('startBtn');
         const pauseBtn = document.getElementById('pauseBtn');
+        const homeBtn = document.getElementById('homeBtn');
         const resumeBtn = document.getElementById('resumeBtn');
         const pauseRestartBtn = document.getElementById('pauseRestartBtn');
         const restartBtn = document.getElementById('restartBtn');
@@ -1200,6 +1202,10 @@
             }
         });
 
+        homeBtn.addEventListener('click', () => {
+            returnToMainMenu();
+        });
+
         if (resumeBtn) {
             resumeBtn.addEventListener('click', () => resumeGame());
         }
@@ -1220,6 +1226,23 @@
         // ==========================================
         // 5. OYUN BAŞLATMA, DURAKLATMA VE BİTİRME
         // ==========================================
+        function returnToMainMenu() {
+            sound.stopMusic(true);
+            gameState = 'START';
+            pointer.active = false;
+            Object.keys(keys).forEach((key) => { keys[key] = false; });
+
+            startScreenEl.classList.remove('hidden');
+            startScreenEl.classList.add('flex');
+            if (pauseScreenEl) {
+                pauseScreenEl.classList.add('hidden');
+                pauseScreenEl.classList.remove('flex');
+            }
+            gameOverScreenEl.classList.add('hidden');
+            gameOverScreenEl.classList.remove('flex');
+            startHighScoreEl.textContent = highScore;
+        }
+
         function startGame() {
             sound.init();
             gameState = 'PLAYING';
